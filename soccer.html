@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>반 대항 축구대회 — PERFECT TEAM 활동지</title>
+<style>
+
+  :root{
+    --navy:#1F3A5F; --navy2:#16233F; --mint:#2563EB; --ice:#EAF2FF;
+    --bg:#F4F7FA; --card:#FFFFFF; --border:#DCE4EC; --muted:#5B6B80;
+    --text:#1A2233; --code-bg:#0E1729; --code-line:#E7ECF3;
+    --danger:#C0392B; --danger-bg:#FBEAEA;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:"Malgun Gothic","맑은 고딕",-apple-system,sans-serif;
+    line-height:1.55; padding:28px 16px 70px;
+  }
+  .wrap{max-width:880px; margin:0 auto;}
+  .hero{
+    background:linear-gradient(135deg,var(--navy) 0%, var(--navy2) 100%);
+    color:#fff; border-radius:16px; padding:26px 32px; margin-bottom:18px;
+    position:relative; overflow:hidden;
+  }
+  .hero::after{
+    content:""; position:absolute; right:-60px; top:-60px; width:200px; height:200px;
+    border-radius:50%; background:rgba(255,255,255,0.06);
+  }
+  .kicker{color:var(--mint); font-weight:700; font-size:13px; letter-spacing:1px; margin-bottom:6px;}
+  .hero h1{margin:0 0 6px; font-size:26px;}
+  .hero p{margin:0; color:#C9D6E8; font-size:13.5px;}
+  .concept-row{display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;}
+  .concept-chip{
+    background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.25);
+    color:#fff; font-size:12px; padding:4px 10px; border-radius:20px;
+  }
+
+  .card{
+    background:var(--card); border:1px solid var(--border); border-radius:14px;
+    padding:20px 26px; margin-bottom:16px; box-shadow:0 1px 3px rgba(20,30,50,0.04);
+    break-inside:avoid; page-break-inside:avoid;
+  }
+  .card h2{
+    font-size:16.5px; margin:0 0 12px; color:var(--navy);
+    display:flex; align-items:center; gap:8px; border-bottom:2px solid var(--navy);
+    padding-bottom:9px;
+  }
+  .card h2 .num{color:var(--mint); font-weight:800;}
+  .card h3{font-size:14.5px; color:var(--navy); margin:18px 0 8px;}
+  .card h3:first-of-type{margin-top:4px;}
+  .card p{font-size:14px; color:#333; margin:0 0 9px;}
+  .muted{color:var(--muted); font-size:13px;}
+  code{background:#EEF2F6; padding:1px 6px; border-radius:5px; font-family:"Consolas","D2Coding",monospace;}
+
+  .student-row{display:flex; gap:14px; flex-wrap:wrap;}
+  .field{flex:1; min-width:180px;}
+  .field label{display:block; font-size:13px; font-weight:700; color:var(--navy); margin-bottom:6px;}
+  .field input{
+    width:100%; padding:9px 12px; border:1.5px solid var(--border); border-radius:8px;
+    font-size:15px; font-family:inherit; background:#fff; transition:border .15s;
+  }
+  .field input:focus{outline:none; border-color:var(--mint);}
+  .field.error input{border-color:var(--danger); background:var(--danger-bg);}
+  .err-msg{color:var(--danger); font-size:12px; margin-top:4px; display:none; font-weight:600;}
+  .field.error .err-msg{display:block;}
+
+  .rule-list{margin:0 0 4px; padding-left:18px; font-size:14px; color:#333;}
+  .rule-list li{margin-bottom:6px;}
+
+  .step-box{
+    border:1px solid #BFDBFE; border-left:4px solid #2563EB; border-radius:10px;
+    padding:14px 18px; margin:10px 0 14px; background:#EFF6FF;
+  }
+  .step-box .s-title{font-weight:800; color:var(--navy); font-size:14.5px; margin-bottom:8px;}
+  .step-box .s-title span{color:var(--mint); margin-right:4px;}
+  .example{
+    background:var(--ice); border:1px solid #C9DCF5; border-radius:8px;
+    padding:10px 14px; margin-top:8px; font-size:13.5px;
+  }
+  .example b{color:var(--navy);}
+  .mono{font-family:"Consolas","D2Coding",monospace;}
+
+  table{width:100%; border-collapse:collapse; font-size:13.5px; margin:6px 0 4px;}
+  th, td{border:1px solid var(--border); padding:9px 11px; text-align:center;}
+  th{background:var(--navy); color:#fff; font-weight:700;}
+  td.result{color:var(--mint); font-weight:700; text-align:left; font-family:"Consolas","D2Coding",monospace;}
+  td.left{text-align:left;}
+  td.mono{font-family:"Consolas","D2Coding",monospace;}
+  tr:nth-child(even) td{background:#FAFCFE;}
+  table.small th, table.small td{padding:6px 8px; font-size:13px;}
+  td.hl{background:#FFF3D6 !important; font-weight:700;}
+
+  .hint-box{
+    background:#EFF6FF; border:1px solid #BFDBFE; border-radius:10px;
+    padding:14px 18px; margin-top:12px;
+  }
+  .hint-box .h-title{color:var(--mint); font-weight:800; font-size:13px; margin-bottom:7px;}
+  .hint-box ul{margin:0; padding-left:18px; font-size:13px; color:#333;}
+  .hint-box li{margin-bottom:5px;}
+
+  .bonus-box{
+    background:#EFF6FF; border:1px solid #BFDBFE; border-radius:10px;
+    padding:14px 18px;
+  }
+  .bonus-box .h-title{color:#1D4ED8; font-weight:800; font-size:13px; margin-bottom:7px;}
+  .bonus-box ul{margin:0; padding-left:18px; font-size:13px; color:#333;}
+  .bonus-box li{margin-bottom:5px;}
+
+  .design-grid{display:flex; flex-direction:column; gap:12px;}
+  .design-item label{display:block; font-weight:700; font-size:13.5px; color:var(--navy); margin-bottom:6px;}
+  .design-item textarea{
+    width:100%; border:1.5px solid var(--border); border-radius:8px; padding:9px 12px;
+    font-family:inherit; font-size:14px; resize:vertical; min-height:48px; background:#fff;
+  }
+  .design-item textarea:focus{outline:none; border-color:var(--mint);}
+
+  .code-box{background:var(--code-bg); border-radius:10px; padding:14px; margin-top:6px;}
+  .code-dots{display:flex; gap:6px; margin-bottom:10px;}
+  .dot{width:10px; height:10px; border-radius:50%;}
+  .dot.r{background:#FF5F56;} .dot.y{background:#FFBD2E;} .dot.g{background:#27C93F;}
+  textarea#codeInput{
+    width:100%; min-height:260px; background:transparent; border:none; outline:none;
+    color:var(--code-line); font-family:"Consolas","D2Coding",monospace; font-size:14px;
+    line-height:1.6; resize:vertical; white-space:pre;
+  }
+  textarea#codeInput::placeholder{color:#6E85A8;}
+
+  .submit-bar{
+    display:flex; align-items:center; justify-content:space-between; gap:16px;
+    background:var(--card); border:1px solid var(--border); border-radius:14px;
+    padding:18px 24px; position:sticky; bottom:16px; box-shadow:0 4px 18px rgba(20,30,50,0.10);
+  }
+  .submit-bar .info{font-size:12.5px; color:var(--muted);}
+  .btn-row{display:flex; gap:10px;}
+  button{
+    font-family:inherit; font-size:14.5px; font-weight:700; border-radius:9px; border:none;
+    padding:12px 22px; cursor:pointer; transition:transform .1s, opacity .15s; white-space:nowrap;
+  }
+  button:active{transform:scale(0.98);}
+  #submitBtn{background:var(--mint); color:#fff;}
+  #submitBtn:hover{opacity:0.92;}
+  #resetBtn{background:#EEF2F6; color:var(--navy);}
+  #resetBtn:hover{opacity:0.85;}
+
+  .toast{
+    position:fixed; left:50%; top:26px; transform:translateX(-50%) translateY(-140%);
+    background:var(--navy2); color:#fff; padding:14px 22px; border-radius:10px;
+    font-size:14px; box-shadow:0 8px 24px rgba(0,0,0,0.25); z-index:50;
+    transition:transform .3s ease; display:flex; align-items:center; gap:10px;
+  }
+  .toast.show{transform:translateX(-50%) translateY(0);}
+  .toast.err{background:var(--danger);}
+  .badge-ok{width:20px; height:20px; border-radius:50%; background:var(--mint); flex:none;
+    display:flex; align-items:center; justify-content:center; font-size:12px;}
+
+  .table-scroll{overflow-x:auto;}
+
+  @media (max-width:600px){
+    .hero{padding:22px;}
+    .card{padding:16px;}
+    .submit-bar{flex-direction:column; align-items:stretch;}
+    .btn-row{justify-content:stretch;}
+    .btn-row button{flex:1;}
+  }
+
+  @page{ size:A4; margin:10mm; }
+  @media print{
+    body{padding:0; background:#fff; font-size:11px; line-height:1.32;}
+    .wrap{max-width:100%;}
+    .hero{padding:14px 18px; margin-bottom:8px; border-radius:10px;}
+    .hero::after{display:none;}
+    .hero h1{font-size:19px; margin-bottom:3px;}
+    .hero p{font-size:11.5px;}
+    .kicker{font-size:10.5px; margin-bottom:4px;}
+    .concept-row{margin-top:6px; gap:5px;}
+    .concept-chip{font-size:10px; padding:2px 7px;}
+    .card{box-shadow:none; padding:9px 15px; margin-bottom:6px; border-radius:8px;}
+    .card h2{font-size:12.5px; padding-bottom:4px; margin-bottom:6px;}
+    .card h3{font-size:11.5px; margin:8px 0 4px;}
+    .card p{font-size:11px; margin-bottom:5px;}
+    .rule-list{font-size:11px;}
+    .rule-list li{margin-bottom:3px;}
+    .step-box{padding:7px 11px; margin:5px 0 7px;}
+    .step-box .s-title{font-size:11.5px; margin-bottom:4px;}
+    .example{padding:6px 10px; font-size:10.5px;}
+    .hint-box, .bonus-box{padding:7px 11px; margin-top:7px;}
+    .hint-box ul, .bonus-box ul{font-size:10.5px;}
+    .hint-box li, .bonus-box li{margin-bottom:2px;}
+    .design-grid{gap:5px;}
+    .design-item label{margin-bottom:2px; font-size:11px;}
+    .design-item textarea{min-height:26px; padding:5px 9px; font-size:11px;}
+    .code-box{padding:9px;}
+    .submit-bar{position:static; box-shadow:none; margin-top:5px; padding:10px 16px;}
+    .info{font-size:10.5px;}
+    .toast{display:none !important;}
+    table{font-size:10.5px;}
+    th, td{padding:5px 7px;}
+    table.small th, table.small td{padding:3px 5px; font-size:10px;}
+    textarea#codeInput{min-height:110px; font-size:11px;}
+  }
+
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="hero">
+<div class="kicker">Ⅲ. 프로그램의 설계와 구현 · 조건문과 반복문 종합 수행평가</div>
+<h1>⚽ 반 대항 축구대회 — PERFECT TEAM</h1>
+<p>후보 5명의 점수를 입력하고 평균 점수, 선발 번호와 인원, 선수 번호, 팀 구성 결과를 출력해 보자.</p>
+<div class="concept-row"><span class="concept-chip">입력·출력</span><span class="concept-chip">리스트</span><span class="concept-chip">for 반복문</span><span class="concept-chip">if·elif·else</span><span class="concept-chip">합계·인원 누적</span><span class="concept-chip">문자열 연결</span><span class="concept-chip">range( )</span><span class="concept-chip">포맷팅 {:.2f} · {:03d}</span></div>
+</div>
+<div class="card"><h2><span class="num">1</span> 문제 설명</h2>
+<p>학교에서 <b>반 대항 축구대회</b>를 개최합니다. 우리 반은 후보 학생 <b>5명</b> 중에서 대표 선수를 뽑으려고 합니다. 후보 5명의 축구 실력 점수를 입력받아 선발 결과를 알려 주는 프로그램을 작성하시오.</p>
+<p>점수가 <b>70점 이상</b>이면 선발하고, 70점 미만이면 탈락합니다. 후보 학생 번호는 점수를 입력한 순서대로 <b>1번부터 5번</b>까지 부여합니다.</p>
+<p>선발된 학생에게는 대회에서 사용할 <b>선수 번호</b>를 새로 발급합니다. 선수 번호는 <span class="mono">PLAYS-001</span>처럼 <b>PLAYS- 뒤에 세 자리 숫자</b>를 붙여 만들며, 선발된 인원만큼 1번부터 차례대로 발급합니다.</p>
+<p>프로그램은 다음 내용을 순서대로 출력합니다.</p>
+<ol class="rule-list"><li>5명의 평균 점수 (소수 둘째 자리까지)</li><li>선발 번호</li><li>선발 인원</li><li>선수 번호 (선발 인원만큼 한 줄에 하나씩)</li><li>팀 구성 결과</li></ol>
+<p class="muted">단, 점수는 0 이상 100 이하의 정수이며 항상 5개가 주어집니다.</p></div>
+
+<div class="card"><h2><span class="num">2</span> 선발 규칙</h2>
+
+<div class="step-box"><div class="s-title"><span>①</span> 평균 점수 구하기</div>
+<p>5명의 점수를 모두 더한 뒤 5로 나눕니다. 평균은 <b>소수 둘째 자리까지</b> 출력하며, 나누어떨어지는 경우에도 <span class="mono">70.00</span>처럼 소수 둘째 자리까지 출력합니다.</p>
+<div class="example"><b>예)</b> 80 60 90 50 70 → 합계 350 → 350 ÷ 5 = 70 → <b>70.00</b></div></div>
+
+<div class="step-box"><div class="s-title"><span>②</span> 선발 판정과 선발 번호 기록</div>
+<p>입력 순서대로 1~5번을 부여하고, <b>70점 이상은 선발, 70점 미만은 탈락</b>입니다. 70점도 선발됩니다.</p>
+<p>선발된 학생의 <b>후보 번호</b>를 차례대로 기록하고, 선발된 인원을 셉니다. 선발된 학생이 없으면 선발 번호는 빈칸으로 둡니다.</p>
+<div class="example"><b>예)</b> 80 60 90 50 70인 경우
+<div class="table-scroll" style="margin-top:8px;"><table class="small" style="background:#fff;">
+<tr><th>후보 번호</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th></tr>
+<tr><td><b>점수</b></td><td>80</td><td>60</td><td>90</td><td>50</td><td>70</td></tr>
+<tr><td><b>판정</b></td><td class="hl">선발</td><td>탈락</td><td class="hl">선발</td><td>탈락</td><td class="hl">선발</td></tr>
+</table></div>
+&nbsp;선발 번호 → <b>1 3 5</b>, 선발 인원 → <b>3명</b></div></div>
+
+<div class="step-box"><div class="s-title"><span>③</span> 선수 번호 발급</div>
+<p>선발된 인원만큼 선수 번호를 <b>한 줄에 하나씩</b> 발급합니다. 선수 번호는 후보 번호와 상관없이 <b>1번부터 차례대로</b> 매기며, 숫자는 항상 <b>세 자리</b>로 맞추고 빈자리는 0으로 채웁니다.</p>
+<div class="example"><b>예)</b> 선발 인원이 3명이면 → <span class="mono">PLAYS-001</span>, <span class="mono">PLAYS-002</span>, <span class="mono">PLAYS-003</span><br>
+<b>예)</b> 후보 2, 3, 5번이 선발되어도 선수 번호는 <span class="mono">PLAYS-001</span>부터 시작합니다.<br>
+<b>예)</b> 선발 인원이 0명이면 선수 번호는 한 줄도 출력하지 않습니다.</div></div>
+
+<div class="step-box"><div class="s-title"><span>④</span> 팀 구성 결과</div>
+<table class="small"><tr><th>선발 인원</th><th>출력 문구</th></tr><tr><td>5명</td><td class="mono">PERFECT TEAM!</td></tr><tr><td>1~4명</td><td class="mono">NEED MORE PLAYERS!</td></tr><tr><td>0명</td><td class="mono">NO PLAYERS!</td></tr></table></div>
+
+<div class="hint-box"><div class="h-title">💡 이번 문제의 핵심</div><ul>
+<li>5개의 점수를 <b>리스트 하나</b>에 저장하고, <code>for</code>문으로 하나씩 꺼내면서 합계를 누적합니다. 점수를 정수로 바꿔 저장해야 계산할 수 있습니다.</li>
+<li>후보 번호는 반복할 때마다 <b>1씩 늘어나는 변수</b>를 따로 두어 기록할 수 있습니다. (05 바코드 검증의 자리 번호 <code>pos</code>를 떠올려 보자.)</li>
+<li>선발 번호는 <b>문자열을 이어 붙여</b> 만듭니다. 숫자를 문자열과 이어 붙이려면 <code>str()</code>로 바꿔야 합니다. (<code>str(3)</code> → <code>'3'</code>)</li>
+<li>합계, 선발 인원, 선발 번호처럼 반복하면서 바뀌는 변수는 반복문을 시작하기 <b>전에</b> 처음 값을 정해 둡니다. 숫자는 <code>0</code>, 문자열은 빈 문자열 <code>''</code>로 시작합니다.</li>
+<li>선수 번호는 <b>선발 인원만큼</b> 반복하여 출력합니다. <code>for i in range(인원):</code>을 쓰면 i는 0부터 시작하므로, 선수 번호는 <code>i+1</code>이 됩니다.</li>
+<li>세 자리 숫자로 0을 채워 출력할 때는 <code>{:03d}</code> 형식을, 소수 둘째 자리까지 출력할 때는 <code>{:.2f}</code> 형식을 사용합니다. (04 철근 자르기, 01 비만도 측정)</li>
+<li>팀 구성 결과는 세 가지로 나뉘므로 <code>if - elif - else</code>를 사용합니다.</li>
+</ul></div>
+</div>
+
+<div class="card"><h2><span class="num">3</span> 입력 · 출력 조건</h2>
+<p><b>입력(한 줄):</b> 5명의 점수를 공백으로 구분하여 한 줄로 입력합니다. 입력할 때 안내 문구는 자유롭게 출력해도 됩니다.</p>
+<p><b>출력:</b> 다음 내용을 순서대로 한 줄에 하나씩 출력합니다.</p>
+<ol class="rule-list">
+<li><code>5명의 평균 점수는 70.00입니다</code> — 평균은 소수 둘째 자리까지</li>
+<li><code>선발 번호: 1 3 5</code> — 선발된 학생이 없으면 <code>선발 번호:</code>까지만 출력</li>
+<li><code>선발 인원: 3명</code></li>
+<li><code>선수 번호는 PLAYS-001</code> — 선발 인원만큼 한 줄씩 (0명이면 출력하지 않음)</li>
+<li><code>NEED MORE PLAYERS!</code> — 선발 인원에 따라 문구 변경</li>
+</ol>
+<p class="muted">선발 번호는 콜론(:) 뒤에 번호마다 공백을 한 칸씩 넣어 구분합니다. 선발 인원에 따라 출력되는 줄 수가 달라집니다.</p></div>
+
+<div class="card"><h2><span class="num">4</span> 입출력 예시</h2><div class="table-scroll"><table>
+<tr><th>번호</th><th>입력</th><th>출력</th><th>설명</th></tr>
+<tr><td>1</td><td class="mono">80 60 90 50 70</td><td class="result">5명의 평균 점수는 70.00입니다<br/>선발 번호: 1 3 5<br/>선발 인원: 3명<br/>선수 번호는 PLAYS-001<br/>선수 번호는 PLAYS-002<br/>선수 번호는 PLAYS-003<br/>NEED MORE PLAYERS!</td><td class="left">합계 350 ÷ 5 = 70.00<br/>70점인 5번도 선발</td></tr>
+<tr><td>2</td><td class="mono">80 90 75 85 100</td><td class="result">5명의 평균 점수는 86.00입니다<br/>선발 번호: 1 2 3 4 5<br/>선발 인원: 5명<br/>선수 번호는 PLAYS-001<br/>선수 번호는 PLAYS-002<br/>선수 번호는 PLAYS-003<br/>선수 번호는 PLAYS-004<br/>선수 번호는 PLAYS-005<br/>PERFECT TEAM!</td><td class="left">5명 모두 선발</td></tr>
+<tr><td>3</td><td class="mono">10 20 30 40 50</td><td class="result">5명의 평균 점수는 30.00입니다<br/>선발 번호:<br/>선발 인원: 0명<br/>NO PLAYERS!</td><td class="left">선발된 학생이 없으므로<br/>선수 번호는 출력하지 않음</td></tr>
+<tr><td>4</td><td class="mono">69 70 71 68 72</td><td class="result">5명의 평균 점수는 70.00입니다<br/>선발 번호: 2 3 5<br/>선발 인원: 3명<br/>선수 번호는 PLAYS-001<br/>선수 번호는 PLAYS-002<br/>선수 번호는 PLAYS-003<br/>NEED MORE PLAYERS!</td><td class="left">후보 2, 3, 5번이 선발되어도<br/>선수 번호는 001부터 발급</td></tr>
+</table></div></div>
+<div class="toast" id="toast"></div>
+<script>
+// 구글 설문지 자동 제출 설정 — "프로그래밍 활동지" 폼과 연결됨 (기존 폼 재사용)
+const GFORM_ACTION = 'https://docs.google.com/forms/d/e/1FAIpQLSfAhvtWQThBjiKmLkMTAEifzfKHvctgI-0IdKvJtp0xKvWuNg/formResponse';
+const GFORM_ENTRY = {
+  studentId: 'entry.1718857135',
+  name: 'entry.965838553',
+  code: 'entry.885478980',
+};
+const ACTIVITY_TITLE = '반 대항 축구대회 — PERFECT TEAM';
+const ACTIVITY_KICKER = 'Ⅲ. 프로그램의 설계와 구현 · 조건문과 반복문 종합 수행평가';
+
+function showToast(msg, isErr){
+  const t = document.getElementById('toast');
+  t.innerHTML = (isErr ? '' : '<span class="badge-ok">✓</span>') + '<span>' + msg + '</span>';
+  t.className = 'toast show' + (isErr ? ' err' : '');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+function clearErrors(){
+  document.getElementById('fStudentId').classList.remove('error');
+  document.getElementById('fStudentName').classList.remove('error');
+  document.getElementById('codeErr').style.display = 'none';
+  document.getElementById('fCode').style.borderColor = 'var(--border)';
+}
+
+document.getElementById('resetBtn').addEventListener('click', function(){
+  document.getElementById('studentId').value = '';
+  document.getElementById('studentName').value = '';
+  document.getElementById('codeInput').value = '';
+  document.querySelectorAll('.design-item textarea').forEach(t => t.value = '');
+  clearErrors();
+  showToast('초기화되었습니다.');
+});
+
+document.getElementById('submitBtn').addEventListener('click', async function(){
+  clearErrors();
+  const id = document.getElementById('studentId').value.trim();
+  const name = document.getElementById('studentName').value.trim();
+  const code = document.getElementById('codeInput').value.trim();
+
+  let hasError = false;
+  if(!id){ document.getElementById('fStudentId').classList.add('error'); hasError = true; }
+  if(!name){ document.getElementById('fStudentName').classList.add('error'); hasError = true; }
+  if(!code){
+    document.getElementById('codeErr').style.display = 'block';
+    document.getElementById('fCode').style.borderColor = 'var(--danger)';
+    hasError = true;
+  }
+  if(hasError){
+    showToast('학번, 이름, 코드를 모두 입력해 주세요.', true);
+    return;
+  }
+
+  const submitBtn = document.getElementById('submitBtn');
+  submitBtn.disabled = true;
+  submitBtn.textContent = '제출 중...';
+
+  const design = document.querySelectorAll('.design-item textarea');
+  const now = new Date();
+  const ts = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' +
+    String(now.getDate()).padStart(2,'0') + ' ' + String(now.getHours()).padStart(2,'0') + ':' +
+    String(now.getMinutes()).padStart(2,'0');
+
+  function esc(s){
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+  function designBlock(label, value){
+    return `<div class="d-item"><div class="d-label">${esc(label)}</div><div class="d-value">${value ? esc(value).replace(/\n/g,'<br>') : '<span class="empty">(작성 없음)</span>'}</div></div>`;
+  }
+
+  const submissionHtml = `<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8">
+<title>${ACTIVITY_TITLE} — ${esc(id)} ${esc(name)} 제출 문서</title>
+<style>
+  body{margin:0; background:#F4F7FA; color:#1A2233; font-family:"Malgun Gothic","맑은 고딕",sans-serif; padding:32px 16px 60px;}
+  .wrap{max-width:760px; margin:0 auto;}
+  .hero{background:linear-gradient(135deg,#1F3A5F 0%, #16233F 100%); color:#fff; border-radius:14px; padding:28px 32px; margin-bottom:20px;}
+  .hero .kicker{color:#1A9E7A; font-weight:700; font-size:13px; margin-bottom:8px;}
+  .hero h1{margin:0 0 10px; font-size:24px;}
+  .meta-row{display:flex; gap:24px; flex-wrap:wrap; font-size:14px; color:#C9D6E8;}
+  .meta-row b{color:#fff;}
+  .card{background:#fff; border:1px solid #DCE4EC; border-radius:12px; padding:22px 26px; margin-bottom:16px;}
+  .card h2{font-size:15px; margin:0 0 12px; color:#1F3A5F; border-bottom:2px solid #1F3A5F; padding-bottom:8px;}
+  .d-item{margin-bottom:14px;}
+  .d-item:last-child{margin-bottom:0;}
+  .d-label{font-weight:700; font-size:13px; color:#1F3A5F; margin-bottom:4px;}
+  .d-value{font-size:14px; color:#333; white-space:pre-wrap; line-height:1.6;}
+  .d-value .empty{color:#9AA7B8; font-style:italic;}
+  .code-box{background:#0E1729; border-radius:10px; padding:16px 18px; overflow-x:auto;}
+  .code-box pre{margin:0; color:#E7ECF3; font-family:"Consolas","D2Coding",monospace; font-size:13.5px; line-height:1.6; white-space:pre-wrap;}
+  .stamp{text-align:center; font-size:12px; color:#9AA7B8; margin-top:20px;}
+</style></head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div class="kicker">${ACTIVITY_KICKER} — 제출 문서</div>
+    <h1>${ACTIVITY_TITLE}</h1>
+    <div class="meta-row">
+      <div>학번 <b>${esc(id)}</b></div>
+      <div>이름 <b>${esc(name)}</b></div>
+      <div>제출 시각 <b>${esc(ts)}</b></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>프로젝트 설계</h2>
+    ${designBlock('변수 설계', design[0].value)}
+    ${designBlock('입력 설계', design[1].value)}
+    ${designBlock('출력 설계', design[2].value)}
+    ${designBlock('처리 설계', design[3].value)}
+  </div>
+  <div class="card">
+    <h2>코드 작성</h2>
+    <div class="code-box"><pre>${esc(code)}</pre></div>
+  </div>
+  <div class="stamp">이 문서는 활동지 제출 시 자동으로 생성되었습니다.</div>
+</div>
+</body></html>`;
+
+  // 구글 설문지로 자동 제출 (선생님의 응답 시트에 자동으로 쌓임)
+  const designText =
+`[활동] ${ACTIVITY_TITLE}
+
+[프로젝트 설계]
+- 변수 설계: ${design[0].value || '(작성 없음)'}
+- 입력 설계: ${design[1].value || '(작성 없음)'}
+- 출력 설계: ${design[2].value || '(작성 없음)'}
+- 처리 설계: ${design[3].value || '(작성 없음)'}
+
+[코드 작성]
+${code}`;
+
+  const fd = new URLSearchParams();
+  fd.append(GFORM_ENTRY.studentId, id);
+  fd.append(GFORM_ENTRY.name, name);
+  fd.append(GFORM_ENTRY.code, designText);
+
+  try {
+    await fetch(GFORM_ACTION, { method: 'POST', mode: 'no-cors', body: fd });
+  } catch (err) {
+    // 네트워크 오류 등으로 자동 제출이 실패해도, 아래의 파일 다운로드는 계속 진행한다.
+  }
+
+  const blob = new Blob([submissionHtml], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${id}_${name}.html`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  submitBtn.disabled = false;
+  submitBtn.textContent = '제출하기';
+
+  showToast('개인 보관용 HTML 파일을 저장했습니다. 온라인 접수 여부는 선생님의 응답 시트에서 확인해 주세요.');
+});
+</script>
+</body>
+</html>
