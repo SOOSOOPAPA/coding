@@ -15,175 +15,218 @@
   body {
     margin: 0;
     min-height: 100vh;
-    font-family: "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
-    background: linear-gradient(160deg, #fff7e6, #e8f6ff);
+    font-family: 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+    background: linear-gradient(135deg, #fff1eb 0%, #ace0f9 100%);
+    color: #333;
     display: flex;
     flex-direction: column;
   }
 
-  /* ===== 상단 컨트롤 바 ===== */
-  .topbar {
+  /* ---------- 상단 컨트롤 ---------- */
+  header {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 12px;
     flex-wrap: wrap;
-    padding: 18px;
-    background: #fff;
-    box-shadow: 0 4px 14px rgba(0,0,0,.1);
+    gap: 12px;
+    padding: 18px 16px;
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(6px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   }
 
-  select, input {
-    font-size: 20px;
-    padding: 10px 14px;
-    border: 2px solid #ffb84d;
-    border-radius: 12px;
+  header h1 {
+    font-size: 1.3rem;
+    margin: 0 12px 0 0;
+  }
+
+  select, input[type="text"] {
+    height: 48px;
+    padding: 0 16px;
+    font-size: 1.1rem;
+    border: 2px solid #ffb199;
+    border-radius: 14px;
+    background: #fff;
     outline: none;
-    background: #fffdf8;
     transition: border-color .2s, box-shadow .2s;
   }
-  select:focus, input:focus {
-    border-color: #ff8800;
-    box-shadow: 0 0 0 4px rgba(255,136,0,.2);
-  }
-  input { width: 120px; text-align: center; }
 
-  .go-btn {
-    font-size: 22px;
+  select:focus, input[type="text"]:focus {
+    border-color: #ff6b6b;
+    box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.2);
+  }
+
+  input[type="text"] { width: 130px; text-align: center; }
+
+  .shake { animation: shake .4s; }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-8px); }
+    40%, 80% { transform: translateX(8px); }
+  }
+
+  #goBtn {
+    height: 48px;
+    padding: 0 34px;
+    font-size: 1.3rem;
     font-weight: 900;
     letter-spacing: 2px;
     color: #fff;
-    padding: 10px 32px;
     border: none;
     border-radius: 999px;
     cursor: pointer;
-    background: linear-gradient(135deg, #ff7a18, #ff3d68);
-    box-shadow: 0 6px 0 #c92a4d, 0 10px 18px rgba(255,61,104,.4);
+    background: linear-gradient(135deg, #ff9a44, #ff3d6e);
+    box-shadow: 0 6px 0 #c92a52, 0 10px 18px rgba(255, 61, 110, 0.4);
     transition: transform .1s, box-shadow .1s, filter .2s;
   }
-  .go-btn:hover  { filter: brightness(1.1); }
-  .go-btn:active {
+  #goBtn:hover  { filter: brightness(1.08); }
+  #goBtn:active {
     transform: translateY(5px);
-    box-shadow: 0 1px 0 #c92a4d, 0 4px 8px rgba(255,61,104,.4);
+    box-shadow: 0 1px 0 #c92a52, 0 4px 8px rgba(255, 61, 110, 0.4);
   }
 
-  /* ===== 메인 영역 ===== */
-  .main {
+  /* ---------- 메인 ---------- */
+  main {
     flex: 1;
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 30px;
-    padding: 24px;
     flex-wrap: wrap;
+    gap: 36px;
+    padding: 24px 16px 40px;
   }
 
-  .stage {
-    width: min(720px, 100%);
-    min-height: 420px;
-    background: #fff;
-    border-radius: 24px;
-    box-shadow: 0 8px 24px rgba(0,0,0,.12);
+  #stageWrap {
+    width: min(640px, 100%);
+    min-height: 300px;
     padding: 20px;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 28px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
     display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-content: center;
-    gap: 6px;
-    position: relative;
-  }
-
-  .hint {
-    position: absolute;
-    inset: 0;
-    display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    text-align: center;
-    padding: 20px;
-    font-size: 24px;
-    line-height: 1.5;
-    color: #999;
-    pointer-events: none;
   }
 
-  .fruit {
-    font-size: 54px;
-    line-height: 1;
-    padding: 4px;
-    background: none;
+  #stage {
+    --size: 90px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, var(--size));
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+  }
+
+  .slot {
+    width: var(--size);
+    height: var(--size);
+    padding: 0;
     border: none;
+    background: transparent;
+    font-size: calc(var(--size) * 0.7);
+    line-height: 1;
     cursor: pointer;
-    user-select: none;
-    animation: appear .4s ease-out backwards;
-    transition: transform .15s;
+    border-radius: 16px;
+    transition: transform .35s cubic-bezier(.34, 1.56, .64, 1), opacity .25s;
   }
-  .fruit:hover { transform: scale(1.2) rotate(-6deg); }
+  .slot:hover { transform: scale(1.15) rotate(-5deg); }
+  .slot:focus-visible { outline: 3px solid #ff6b6b; }
 
-  .fruit.pop { animation: pop .3s ease-in forwards; pointer-events: none; }
-
-  /* 사라진 과일: 보이지 않지만 자리는 그대로 유지 (재정렬 방지) */
-  .fruit.gone {
-    visibility: hidden;
+  /* 사라진 자리는 그대로 두고 보이지만 않게 (재정렬 X) */
+  .slot.gone {
+    opacity: 0;
+    transform: scale(0) rotate(90deg);
     pointer-events: none;
   }
 
-  @keyframes appear {
-    from { transform: scale(0) rotate(-90deg); opacity: 0; }
-    to   { transform: scale(1) rotate(0);      opacity: 1; }
-  }
+  .slot.pop { animation: pop .4s cubic-bezier(.34, 1.56, .64, 1); }
   @keyframes pop {
-    0%   { transform: scale(1);   opacity: 1; }
-    40%  { transform: scale(1.5); opacity: 1; }
-    100% { transform: scale(0);   opacity: 0; }
+    from { transform: scale(0); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
   }
 
-  /* ===== 전광판 ===== */
-  .board {
-    background: #111;
-    border: 6px solid #444;
-    border-radius: 18px;
-    padding: 18px 26px;
+  #message {
+    margin-top: 14px;
+    min-height: 1.6em;
+    font-size: 1.15rem;
+    color: #666;
     text-align: center;
-    box-shadow: 0 8px 24px rgba(0,0,0,.35), inset 0 0 20px #000;
   }
-  .board-title {
-    color: #aaa;
-    font-size: 16px;
-    margin-bottom: 8px;
-    letter-spacing: 2px;
-  }
-  .led-wrap {
-    position: relative;
-    font-family: "Courier New", monospace;
-    font-weight: bold;
-    font-size: 96px;
-    line-height: 1.1;
-    letter-spacing: 8px;
-    padding: 0 6px;
-  }
-  .led-ghost {
-    color: #2a0a0a;            /* 꺼진 LED 느낌 */
-  }
-  .led-num {
-    position: absolute;
-    inset: 0;
-    text-align: right;
-    padding-right: 14px;
-    color: #ff2a2a;
-    text-shadow: 0 0 8px #ff2a2a, 0 0 20px #ff0000;
-  }
-  .led-num.bump { animation: bump .25s; }
-  @keyframes bump {
-    50% { transform: scale(1.15); }
-  }
-  .board-name { color: #ffd34d; margin-top: 8px; font-size: 20px; }
 
-  @media (max-width: 700px) {
-    .led-wrap { font-size: 64px; }
-    .fruit { font-size: 44px; }
-    .stage { min-height: 300px; }
+  /* ---------- 전광판 ---------- */
+  #panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 22px;
   }
+
+  #board {
+    display: flex;
+    gap: 8px;
+    padding: 18px 22px;
+    background: #111;
+    border-radius: 20px;
+    border: 6px solid #444;
+    box-shadow: inset 0 0 20px #000, 0 10px 24px rgba(0, 0, 0, 0.35);
+  }
+
+  .digit {
+    position: relative;
+    width: 56px;
+    height: 84px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Orbitron', 'Courier New', monospace;
+    font-weight: 900;
+    font-size: 4rem;
+  }
+  .digit .ghost {
+    position: absolute;
+    color: #2a1010;
+  }
+  .digit .real {
+    position: relative;
+    color: #ff3030;
+    text-shadow: 0 0 8px #ff2020, 0 0 20px #ff0000;
+  }
+  .digit .real.off { color: transparent; text-shadow: none; }
+
+  #board.bump { animation: bump .25s; }
+  @keyframes bump {
+    50% { transform: scale(1.08); }
+  }
+
+  .btns { display: flex; gap: 22px; }
+
+  .round {
+    width: 76px;
+    height: 76px;
+    border: none;
+    border-radius: 50%;
+    font-size: 2.6rem;
+    font-weight: 900;
+    color: #fff;
+    cursor: pointer;
+    line-height: 1;
+    transition: transform .1s, box-shadow .1s, filter .2s;
+  }
+  .round:active:not(:disabled) { transform: translateY(5px); }
+  .round:disabled { filter: grayscale(1) opacity(.5); cursor: not-allowed; }
+
+  #minus {
+    background: linear-gradient(135deg, #5b8def, #3b5bdb);
+    box-shadow: 0 6px 0 #2b44a8, 0 10px 16px rgba(59, 91, 219, .35);
+  }
+  #minus:active:not(:disabled) { box-shadow: 0 1px 0 #2b44a8; }
+
+  #plus {
+    background: linear-gradient(135deg, #51d88a, #2b9e5b);
+    box-shadow: 0 6px 0 #1e7a44, 0 10px 16px rgba(43, 158, 91, .35);
+  }
+  #plus:active:not(:disabled) { box-shadow: 0 1px 0 #1e7a44; }
 
 
 							</style>
@@ -193,289 +236,380 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>과일로 배우는 덧셈 뺄셈</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; }
 
   body {
     margin: 0;
     min-height: 100vh;
-    font-family: "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
-    background: linear-gradient(160deg, #fff7e6, #e8f6ff);
+    font-family: 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+    background: linear-gradient(135deg, #fff1eb 0%, #ace0f9 100%);
+    color: #333;
     display: flex;
     flex-direction: column;
   }
 
-  /* ===== 상단 컨트롤 바 ===== */
-  .topbar {
+  /* ---------- 상단 컨트롤 ---------- */
+  header {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 12px;
     flex-wrap: wrap;
-    padding: 18px;
-    background: #fff;
-    box-shadow: 0 4px 14px rgba(0,0,0,.1);
+    gap: 12px;
+    padding: 18px 16px;
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(6px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   }
 
-  select, input {
-    font-size: 20px;
-    padding: 10px 14px;
-    border: 2px solid #ffb84d;
-    border-radius: 12px;
+  header h1 {
+    font-size: 1.3rem;
+    margin: 0 12px 0 0;
+  }
+
+  select, input[type="text"] {
+    height: 48px;
+    padding: 0 16px;
+    font-size: 1.1rem;
+    border: 2px solid #ffb199;
+    border-radius: 14px;
+    background: #fff;
     outline: none;
-    background: #fffdf8;
     transition: border-color .2s, box-shadow .2s;
   }
-  select:focus, input:focus {
-    border-color: #ff8800;
-    box-shadow: 0 0 0 4px rgba(255,136,0,.2);
-  }
-  input { width: 120px; text-align: center; }
 
-  .go-btn {
-    font-size: 22px;
+  select:focus, input[type="text"]:focus {
+    border-color: #ff6b6b;
+    box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.2);
+  }
+
+  input[type="text"] { width: 130px; text-align: center; }
+
+  .shake { animation: shake .4s; }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-8px); }
+    40%, 80% { transform: translateX(8px); }
+  }
+
+  #goBtn {
+    height: 48px;
+    padding: 0 34px;
+    font-size: 1.3rem;
     font-weight: 900;
     letter-spacing: 2px;
     color: #fff;
-    padding: 10px 32px;
     border: none;
     border-radius: 999px;
     cursor: pointer;
-    background: linear-gradient(135deg, #ff7a18, #ff3d68);
-    box-shadow: 0 6px 0 #c92a4d, 0 10px 18px rgba(255,61,104,.4);
+    background: linear-gradient(135deg, #ff9a44, #ff3d6e);
+    box-shadow: 0 6px 0 #c92a52, 0 10px 18px rgba(255, 61, 110, 0.4);
     transition: transform .1s, box-shadow .1s, filter .2s;
   }
-  .go-btn:hover  { filter: brightness(1.1); }
-  .go-btn:active {
+  #goBtn:hover  { filter: brightness(1.08); }
+  #goBtn:active {
     transform: translateY(5px);
-    box-shadow: 0 1px 0 #c92a4d, 0 4px 8px rgba(255,61,104,.4);
+    box-shadow: 0 1px 0 #c92a52, 0 4px 8px rgba(255, 61, 110, 0.4);
   }
 
-  /* ===== 메인 영역 ===== */
-  .main {
+  /* ---------- 메인 ---------- */
+  main {
     flex: 1;
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 30px;
-    padding: 24px;
     flex-wrap: wrap;
+    gap: 36px;
+    padding: 24px 16px 40px;
   }
 
-  .stage {
-    width: min(720px, 100%);
-    min-height: 420px;
-    background: #fff;
-    border-radius: 24px;
-    box-shadow: 0 8px 24px rgba(0,0,0,.12);
+  #stageWrap {
+    width: min(640px, 100%);
+    min-height: 300px;
     padding: 20px;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 28px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
     display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-content: center;
-    gap: 6px;
-    position: relative;
-  }
-
-  .hint {
-    position: absolute;
-    inset: 0;
-    display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    text-align: center;
-    padding: 20px;
-    font-size: 24px;
-    line-height: 1.5;
-    color: #999;
-    pointer-events: none;
   }
 
-  .fruit {
-    font-size: 54px;
-    line-height: 1;
-    padding: 4px;
-    background: none;
+  #stage {
+    --size: 90px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, var(--size));
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+  }
+
+  .slot {
+    width: var(--size);
+    height: var(--size);
+    padding: 0;
     border: none;
+    background: transparent;
+    font-size: calc(var(--size) * 0.7);
+    line-height: 1;
     cursor: pointer;
-    user-select: none;
-    animation: appear .4s ease-out backwards;
-    transition: transform .15s;
+    border-radius: 16px;
+    transition: transform .35s cubic-bezier(.34, 1.56, .64, 1), opacity .25s;
   }
-  .fruit:hover { transform: scale(1.2) rotate(-6deg); }
+  .slot:hover { transform: scale(1.15) rotate(-5deg); }
+  .slot:focus-visible { outline: 3px solid #ff6b6b; }
 
-  .fruit.pop { animation: pop .3s ease-in forwards; pointer-events: none; }
-
-  /* 사라진 과일: 보이지 않지만 자리는 그대로 유지 (재정렬 방지) */
-  .fruit.gone {
-    visibility: hidden;
+  /* 사라진 자리는 그대로 두고 보이지만 않게 (재정렬 X) */
+  .slot.gone {
+    opacity: 0;
+    transform: scale(0) rotate(90deg);
     pointer-events: none;
   }
 
-  @keyframes appear {
-    from { transform: scale(0) rotate(-90deg); opacity: 0; }
-    to   { transform: scale(1) rotate(0);      opacity: 1; }
-  }
+  .slot.pop { animation: pop .4s cubic-bezier(.34, 1.56, .64, 1); }
   @keyframes pop {
-    0%   { transform: scale(1);   opacity: 1; }
-    40%  { transform: scale(1.5); opacity: 1; }
-    100% { transform: scale(0);   opacity: 0; }
+    from { transform: scale(0); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
   }
 
-  /* ===== 전광판 ===== */
-  .board {
-    background: #111;
-    border: 6px solid #444;
-    border-radius: 18px;
-    padding: 18px 26px;
+  #message {
+    margin-top: 14px;
+    min-height: 1.6em;
+    font-size: 1.15rem;
+    color: #666;
     text-align: center;
-    box-shadow: 0 8px 24px rgba(0,0,0,.35), inset 0 0 20px #000;
   }
-  .board-title {
-    color: #aaa;
-    font-size: 16px;
-    margin-bottom: 8px;
-    letter-spacing: 2px;
-  }
-  .led-wrap {
-    position: relative;
-    font-family: "Courier New", monospace;
-    font-weight: bold;
-    font-size: 96px;
-    line-height: 1.1;
-    letter-spacing: 8px;
-    padding: 0 6px;
-  }
-  .led-ghost {
-    color: #2a0a0a;            /* 꺼진 LED 느낌 */
-  }
-  .led-num {
-    position: absolute;
-    inset: 0;
-    text-align: right;
-    padding-right: 14px;
-    color: #ff2a2a;
-    text-shadow: 0 0 8px #ff2a2a, 0 0 20px #ff0000;
-  }
-  .led-num.bump { animation: bump .25s; }
-  @keyframes bump {
-    50% { transform: scale(1.15); }
-  }
-  .board-name { color: #ffd34d; margin-top: 8px; font-size: 20px; }
 
-  @media (max-width: 700px) {
-    .led-wrap { font-size: 64px; }
-    .fruit { font-size: 44px; }
-    .stage { min-height: 300px; }
+  /* ---------- 전광판 ---------- */
+  #panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 22px;
   }
+
+  #board {
+    display: flex;
+    gap: 8px;
+    padding: 18px 22px;
+    background: #111;
+    border-radius: 20px;
+    border: 6px solid #444;
+    box-shadow: inset 0 0 20px #000, 0 10px 24px rgba(0, 0, 0, 0.35);
+  }
+
+  .digit {
+    position: relative;
+    width: 56px;
+    height: 84px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Orbitron', 'Courier New', monospace;
+    font-weight: 900;
+    font-size: 4rem;
+  }
+  .digit .ghost {
+    position: absolute;
+    color: #2a1010;
+  }
+  .digit .real {
+    position: relative;
+    color: #ff3030;
+    text-shadow: 0 0 8px #ff2020, 0 0 20px #ff0000;
+  }
+  .digit .real.off { color: transparent; text-shadow: none; }
+
+  #board.bump { animation: bump .25s; }
+  @keyframes bump {
+    50% { transform: scale(1.08); }
+  }
+
+  .btns { display: flex; gap: 22px; }
+
+  .round {
+    width: 76px;
+    height: 76px;
+    border: none;
+    border-radius: 50%;
+    font-size: 2.6rem;
+    font-weight: 900;
+    color: #fff;
+    cursor: pointer;
+    line-height: 1;
+    transition: transform .1s, box-shadow .1s, filter .2s;
+  }
+  .round:active:not(:disabled) { transform: translateY(5px); }
+  .round:disabled { filter: grayscale(1) opacity(.5); cursor: not-allowed; }
+
+  #minus {
+    background: linear-gradient(135deg, #5b8def, #3b5bdb);
+    box-shadow: 0 6px 0 #2b44a8, 0 10px 16px rgba(59, 91, 219, .35);
+  }
+  #minus:active:not(:disabled) { box-shadow: 0 1px 0 #2b44a8; }
+
+  #plus {
+    background: linear-gradient(135deg, #51d88a, #2b9e5b);
+    box-shadow: 0 6px 0 #1e7a44, 0 10px 16px rgba(43, 158, 91, .35);
+  }
+  #plus:active:not(:disabled) { box-shadow: 0 1px 0 #1e7a44; }
 </style>
 </head>
 <body>
 
-  <div class="topbar">
-    <select id="fruitSelect">
-      <option value="apple">🍎 사과</option>
-      <option value="banana">🍌 바나나</option>
-      <option value="grape">🍇 포도</option>
-    </select>
-    <input id="numInput" type="text" inputmode="numeric" maxlength="3" placeholder="숫자">
-    <button id="goBtn" class="go-btn">GO!</button>
-  </div>
+<header>
+  <h1>🍎 과일 계산기</h1>
+  <select id="fruitSelect" aria-label="과일 선택">
+    <option value="apple">🍎 사과</option>
+    <option value="banana">🍌 바나나</option>
+    <option value="grape">🍇 포도</option>
+    <option value="watermelon">🍉 수박</option>
+    <option value="strawberry">🍓 딸기</option>
+  </select>
+  <input type="text" id="numInput" inputmode="numeric" maxlength="3" placeholder="숫자 (0~100)" aria-label="개수 입력">
+  <button id="goBtn">GO!</button>
+</header>
 
-  <div class="main">
-    <div class="stage" id="stage">
-      <div class="hint" id="hint">과일과 숫자를 고르고<br>GO! 를 눌러 보세요 👆</div>
-    </div>
+<main>
+  <section id="stageWrap">
+    <div id="stage"></div>
+    <div id="message">과일과 숫자를 고르고 <b>GO!</b>를 눌러보세요 👆</div>
+  </section>
 
-    <div class="board">
-      <div class="board-title">📟 남은 개수</div>
-      <div class="led-wrap">
-        <span class="led-ghost">888</span>
-        <span class="led-num" id="ledNum">000</span>
-      </div>
-      <div class="board-name" id="boardName">-</div>
+  <aside id="panel">
+    <div id="board" aria-live="polite">
+      <div class="digit"><span class="ghost">8</span><span class="real off">0</span></div>
+      <div class="digit"><span class="ghost">8</span><span class="real off">0</span></div>
+      <div class="digit"><span class="ghost">8</span><span class="real">0</span></div>
     </div>
-  </div>
+    <div class="btns">
+      <button class="round" id="minus" aria-label="하나 빼기" disabled>−</button>
+      <button class="round" id="plus"  aria-label="하나 더하기" disabled>+</button>
+    </div>
+  </aside>
+</main>
 
 <script>
   const FRUITS = {
-    apple:  { emoji: "🍎", name: "사과" },
-    banana: { emoji: "🍌", name: "바나나" },
-    grape:  { emoji: "🍇", name: "포도" }
+    apple:      { name: '사과',   emoji: '🍎' },
+    banana:     { name: '바나나', emoji: '🍌' },
+    grape:      { name: '포도',   emoji: '🍇' },
+    watermelon: { name: '수박',   emoji: '🍉' },
+    strawberry: { name: '딸기',   emoji: '🍓' }
   };
   const MAX = 100;
 
-  const select    = document.getElementById("fruitSelect");
-  const input     = document.getElementById("numInput");
-  const goBtn     = document.getElementById("goBtn");
-  const stage     = document.getElementById("stage");
-  const hint      = document.getElementById("hint");
-  const ledNum    = document.getElementById("ledNum");
-  const boardName = document.getElementById("boardName");
+  const $ = id => document.getElementById(id);
+  const stage = $('stage'), message = $('message'), board = $('board');
+  const input = $('numInput'), select = $('fruitSelect');
+  const minusBtn = $('minus'), plusBtn = $('plus');
+  const digitEls = [...document.querySelectorAll('.digit .real')];
 
-  let count = 0;
+  let fruit = null;      // 현재 과일 키
+  let slots = [];        // { el, visible } - 자리를 유지하기 위한 배열
 
-  function updateBoard() {
-    ledNum.textContent = String(count).padStart(3, "0");
-    ledNum.classList.remove("bump");
-    void ledNum.offsetWidth;          // 애니메이션 재시작
-    ledNum.classList.add("bump");
-  }
+  // 숫자만 입력되도록
+  input.addEventListener('input', () => {
+    input.value = input.value.replace(/\D/g, '');
+  });
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') start(); });
+  $('goBtn').addEventListener('click', start);
+  minusBtn.addEventListener('click', removeLast);
+  plusBtn.addEventListener('click', addOne);
 
-  function setHint(html) {
-    hint.innerHTML = html;
-    hint.style.display = html ? "flex" : "none";
-  }
-
-  function go() {
+  function start() {
     const n = parseInt(input.value, 10);
     if (isNaN(n) || n < 0 || n > MAX) {
-      alert(`0 ~ ${MAX} 사이의 숫자를 입력해 주세요!`);
+      input.classList.remove('shake');
+      void input.offsetWidth;
+      input.classList.add('shake');
+      message.textContent = `0부터 ${MAX} 사이의 숫자를 입력해 주세요!`;
       input.focus();
       return;
     }
+    fruit = select.value;
+    stage.innerHTML = '';
+    slots = [];
+    for (let i = 0; i < n; i++) createSlot(false);
+    updateSize();
+    update();
+  }
 
-    const fruit = FRUITS[select.value];
+  function createSlot(animate) {
+    const el = document.createElement('button');
+    el.className = 'slot' + (animate ? ' pop' : '');
+    el.textContent = FRUITS[fruit].emoji;
+    el.setAttribute('aria-label', FRUITS[fruit].name + ' 하나 없애기');
+    const slot = { el, visible: true };
+    el.addEventListener('click', () => removeSlot(slot));
+    stage.appendChild(el);
+    slots.push(slot);
+    return slot;
+  }
 
-    // 기존 과일(숨겨진 것 포함) 모두 제거
-    stage.querySelectorAll(".fruit").forEach(el => el.remove());
+  function updateSize() {
+    const t = slots.length;
+    const size = t <= 20 ? 90 : t <= 40 ? 76 : t <= 70 ? 62 : 52;
+    stage.style.setProperty('--size', size + 'px');
+  }
 
-    count = n;
-    boardName.textContent = fruit.name;
-    updateBoard();
+  function count() { return slots.filter(s => s.visible).length; }
 
-    if (n === 0) { setHint("0개예요! 😅"); return; }
-    setHint("");
+  // 클릭한 자리에서 그대로 사라짐 (다른 과일은 움직이지 않음)
+  function removeSlot(slot) {
+    if (!slot.visible) return;
+    slot.visible = false;
+    slot.el.classList.remove('pop');
+    slot.el.classList.add('gone');
+    update();
+  }
 
-    for (let i = 0; i < n; i++) {
-      const btn = document.createElement("button");
-      btn.className = "fruit";
-      btn.textContent = fruit.emoji;
-      btn.setAttribute("aria-label", fruit.name);
-      btn.style.animationDelay = (i * 0.02) + "s";
-      btn.addEventListener("click", () => removeFruit(btn));
-      stage.appendChild(btn);
+  // "-" 버튼: 보이는 것 중 마지막 하나 제거
+  function removeLast() {
+    for (let i = slots.length - 1; i >= 0; i--) {
+      if (slots[i].visible) { removeSlot(slots[i]); return; }
     }
   }
 
-  function removeFruit(el) {
-    if (el.classList.contains("pop")) return;   // 중복 클릭 방지
-    el.classList.add("pop");
-    count--;
-    updateBoard();
-    setTimeout(() => {
-      el.classList.add("gone");                 // remove() 대신 숨기기만 → 자리 유지
-      if (count === 0) setHint("🎉 모두 사라졌어요! 0개 🎉");
-    }, 300);
+  // "+" 버튼: 비어 있는 첫 자리를 채우고, 없으면 끝에 새로 추가
+  function addOne() {
+    if (!fruit || count() >= MAX) return;
+    const empty = slots.find(s => !s.visible);
+    if (empty) {
+      empty.visible = true;
+      empty.el.classList.remove('gone');
+    } else {
+      createSlot(true);
+      updateSize();
+    }
+    update();
   }
 
-  goBtn.addEventListener("click", go);
-  input.addEventListener("keydown", e => { if (e.key === "Enter") go(); });
-  input.addEventListener("input", () => {        // 숫자만 입력되게
-    input.value = input.value.replace(/\D/g, "");
-  });
+  function update() {
+    const c = count();
+    const str = String(c).padStart(3, '0');
+
+    // 전광판: 앞자리 0은 꺼진 상태로 표시
+    digitEls.forEach((el, i) => {
+      el.textContent = str[i];
+      const leadingZero = i < 2 && str.slice(0, i + 1).replace(/0/g, '') === '';
+      el.classList.toggle('off', leadingZero);
+    });
+    board.classList.remove('bump');
+    void board.offsetWidth;
+    board.classList.add('bump');
+
+    minusBtn.disabled = !fruit || c === 0;
+    plusBtn.disabled  = !fruit || c >= MAX;
+
+    const f = FRUITS[fruit];
+    if (c === 0) message.textContent = `${f.name}이(가) 하나도 없어요! 🎉  + 버튼으로 다시 채워보세요`;
+    else         message.textContent = `${f.name} ${c}개 · 과일을 클릭하거나 − 버튼을 눌러보세요`;
+  }
 </script>
 </body>
 </html>
@@ -485,81 +619,121 @@
 							<script>
                             	
   const FRUITS = {
-    apple:  { emoji: "🍎", name: "사과" },
-    banana: { emoji: "🍌", name: "바나나" },
-    grape:  { emoji: "🍇", name: "포도" }
+    apple:      { name: '사과',   emoji: '🍎' },
+    banana:     { name: '바나나', emoji: '🍌' },
+    grape:      { name: '포도',   emoji: '🍇' },
+    watermelon: { name: '수박',   emoji: '🍉' },
+    strawberry: { name: '딸기',   emoji: '🍓' }
   };
   const MAX = 100;
 
-  const select    = document.getElementById("fruitSelect");
-  const input     = document.getElementById("numInput");
-  const goBtn     = document.getElementById("goBtn");
-  const stage     = document.getElementById("stage");
-  const hint      = document.getElementById("hint");
-  const ledNum    = document.getElementById("ledNum");
-  const boardName = document.getElementById("boardName");
+  const $ = id => document.getElementById(id);
+  const stage = $('stage'), message = $('message'), board = $('board');
+  const input = $('numInput'), select = $('fruitSelect');
+  const minusBtn = $('minus'), plusBtn = $('plus');
+  const digitEls = [...document.querySelectorAll('.digit .real')];
 
-  let count = 0;
+  let fruit = null;      // 현재 과일 키
+  let slots = [];        // { el, visible } - 자리를 유지하기 위한 배열
 
-  function updateBoard() {
-    ledNum.textContent = String(count).padStart(3, "0");
-    ledNum.classList.remove("bump");
-    void ledNum.offsetWidth;          // 애니메이션 재시작
-    ledNum.classList.add("bump");
-  }
+  // 숫자만 입력되도록
+  input.addEventListener('input', () => {
+    input.value = input.value.replace(/\D/g, '');
+  });
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') start(); });
+  $('goBtn').addEventListener('click', start);
+  minusBtn.addEventListener('click', removeLast);
+  plusBtn.addEventListener('click', addOne);
 
-  function setHint(html) {
-    hint.innerHTML = html;
-    hint.style.display = html ? "flex" : "none";
-  }
-
-  function go() {
+  function start() {
     const n = parseInt(input.value, 10);
     if (isNaN(n) || n < 0 || n > MAX) {
-      alert(`0 ~ ${MAX} 사이의 숫자를 입력해 주세요!`);
+      input.classList.remove('shake');
+      void input.offsetWidth;
+      input.classList.add('shake');
+      message.textContent = `0부터 ${MAX} 사이의 숫자를 입력해 주세요!`;
       input.focus();
       return;
     }
+    fruit = select.value;
+    stage.innerHTML = '';
+    slots = [];
+    for (let i = 0; i < n; i++) createSlot(false);
+    updateSize();
+    update();
+  }
 
-    const fruit = FRUITS[select.value];
+  function createSlot(animate) {
+    const el = document.createElement('button');
+    el.className = 'slot' + (animate ? ' pop' : '');
+    el.textContent = FRUITS[fruit].emoji;
+    el.setAttribute('aria-label', FRUITS[fruit].name + ' 하나 없애기');
+    const slot = { el, visible: true };
+    el.addEventListener('click', () => removeSlot(slot));
+    stage.appendChild(el);
+    slots.push(slot);
+    return slot;
+  }
 
-    // 기존 과일(숨겨진 것 포함) 모두 제거
-    stage.querySelectorAll(".fruit").forEach(el => el.remove());
+  function updateSize() {
+    const t = slots.length;
+    const size = t <= 20 ? 90 : t <= 40 ? 76 : t <= 70 ? 62 : 52;
+    stage.style.setProperty('--size', size + 'px');
+  }
 
-    count = n;
-    boardName.textContent = fruit.name;
-    updateBoard();
+  function count() { return slots.filter(s => s.visible).length; }
 
-    if (n === 0) { setHint("0개예요! 😅"); return; }
-    setHint("");
+  // 클릭한 자리에서 그대로 사라짐 (다른 과일은 움직이지 않음)
+  function removeSlot(slot) {
+    if (!slot.visible) return;
+    slot.visible = false;
+    slot.el.classList.remove('pop');
+    slot.el.classList.add('gone');
+    update();
+  }
 
-    for (let i = 0; i < n; i++) {
-      const btn = document.createElement("button");
-      btn.className = "fruit";
-      btn.textContent = fruit.emoji;
-      btn.setAttribute("aria-label", fruit.name);
-      btn.style.animationDelay = (i * 0.02) + "s";
-      btn.addEventListener("click", () => removeFruit(btn));
-      stage.appendChild(btn);
+  // "-" 버튼: 보이는 것 중 마지막 하나 제거
+  function removeLast() {
+    for (let i = slots.length - 1; i >= 0; i--) {
+      if (slots[i].visible) { removeSlot(slots[i]); return; }
     }
   }
 
-  function removeFruit(el) {
-    if (el.classList.contains("pop")) return;   // 중복 클릭 방지
-    el.classList.add("pop");
-    count--;
-    updateBoard();
-    setTimeout(() => {
-      el.classList.add("gone");                 // remove() 대신 숨기기만 → 자리 유지
-      if (count === 0) setHint("🎉 모두 사라졌어요! 0개 🎉");
-    }, 300);
+  // "+" 버튼: 비어 있는 첫 자리를 채우고, 없으면 끝에 새로 추가
+  function addOne() {
+    if (!fruit || count() >= MAX) return;
+    const empty = slots.find(s => !s.visible);
+    if (empty) {
+      empty.visible = true;
+      empty.el.classList.remove('gone');
+    } else {
+      createSlot(true);
+      updateSize();
+    }
+    update();
   }
 
-  goBtn.addEventListener("click", go);
-  input.addEventListener("keydown", e => { if (e.key === "Enter") go(); });
-  input.addEventListener("input", () => {        // 숫자만 입력되게
-    input.value = input.value.replace(/\D/g, "");
-  });
+  function update() {
+    const c = count();
+    const str = String(c).padStart(3, '0');
+
+    // 전광판: 앞자리 0은 꺼진 상태로 표시
+    digitEls.forEach((el, i) => {
+      el.textContent = str[i];
+      const leadingZero = i < 2 && str.slice(0, i + 1).replace(/0/g, '') === '';
+      el.classList.toggle('off', leadingZero);
+    });
+    board.classList.remove('bump');
+    void board.offsetWidth;
+    board.classList.add('bump');
+
+    minusBtn.disabled = !fruit || c === 0;
+    plusBtn.disabled  = !fruit || c >= MAX;
+
+    const f = FRUITS[fruit];
+    if (c === 0) message.textContent = `${f.name}이(가) 하나도 없어요! 🎉  + 버튼으로 다시 채워보세요`;
+    else         message.textContent = `${f.name} ${c}개 · 과일을 클릭하거나 − 버튼을 눌러보세요`;
+  }
 
 
 							</script>
