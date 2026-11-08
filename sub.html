@@ -1,0 +1,568 @@
+
+                        <!DOCTYPE html>
+                        <html lang="en">
+                        <head>
+                            <meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+							<style>
+								body {
+									background-color: white; /* Ensure the iframe has a white background */
+								}
+
+								
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+    background: linear-gradient(160deg, #fff7e6, #e8f6ff);
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ===== 상단 컨트롤 바 ===== */
+  .topbar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 18px;
+    background: #fff;
+    box-shadow: 0 4px 14px rgba(0,0,0,.1);
+  }
+
+  select, input {
+    font-size: 20px;
+    padding: 10px 14px;
+    border: 2px solid #ffb84d;
+    border-radius: 12px;
+    outline: none;
+    background: #fffdf8;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  select:focus, input:focus {
+    border-color: #ff8800;
+    box-shadow: 0 0 0 4px rgba(255,136,0,.2);
+  }
+  input { width: 120px; text-align: center; }
+
+  .go-btn {
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: #fff;
+    padding: 10px 32px;
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    background: linear-gradient(135deg, #ff7a18, #ff3d68);
+    box-shadow: 0 6px 0 #c92a4d, 0 10px 18px rgba(255,61,104,.4);
+    transition: transform .1s, box-shadow .1s, filter .2s;
+  }
+  .go-btn:hover  { filter: brightness(1.1); }
+  .go-btn:active {
+    transform: translateY(5px);
+    box-shadow: 0 1px 0 #c92a4d, 0 4px 8px rgba(255,61,104,.4);
+  }
+
+  /* ===== 메인 영역 ===== */
+  .main {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    padding: 24px;
+    flex-wrap: wrap;
+  }
+
+  .stage {
+    width: min(720px, 100%);
+    min-height: 420px;
+    background: #fff;
+    border-radius: 24px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.12);
+    padding: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-content: center;
+    gap: 6px;
+    position: relative;
+  }
+
+  .hint {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 20px;
+    font-size: 24px;
+    line-height: 1.5;
+    color: #999;
+    pointer-events: none;
+  }
+
+  .fruit {
+    font-size: 54px;
+    line-height: 1;
+    padding: 4px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    user-select: none;
+    animation: appear .4s ease-out backwards;
+    transition: transform .15s;
+  }
+  .fruit:hover { transform: scale(1.2) rotate(-6deg); }
+
+  .fruit.pop { animation: pop .3s ease-in forwards; pointer-events: none; }
+
+  /* 사라진 과일: 보이지 않지만 자리는 그대로 유지 (재정렬 방지) */
+  .fruit.gone {
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  @keyframes appear {
+    from { transform: scale(0) rotate(-90deg); opacity: 0; }
+    to   { transform: scale(1) rotate(0);      opacity: 1; }
+  }
+  @keyframes pop {
+    0%   { transform: scale(1);   opacity: 1; }
+    40%  { transform: scale(1.5); opacity: 1; }
+    100% { transform: scale(0);   opacity: 0; }
+  }
+
+  /* ===== 전광판 ===== */
+  .board {
+    background: #111;
+    border: 6px solid #444;
+    border-radius: 18px;
+    padding: 18px 26px;
+    text-align: center;
+    box-shadow: 0 8px 24px rgba(0,0,0,.35), inset 0 0 20px #000;
+  }
+  .board-title {
+    color: #aaa;
+    font-size: 16px;
+    margin-bottom: 8px;
+    letter-spacing: 2px;
+  }
+  .led-wrap {
+    position: relative;
+    font-family: "Courier New", monospace;
+    font-weight: bold;
+    font-size: 96px;
+    line-height: 1.1;
+    letter-spacing: 8px;
+    padding: 0 6px;
+  }
+  .led-ghost {
+    color: #2a0a0a;            /* 꺼진 LED 느낌 */
+  }
+  .led-num {
+    position: absolute;
+    inset: 0;
+    text-align: right;
+    padding-right: 14px;
+    color: #ff2a2a;
+    text-shadow: 0 0 8px #ff2a2a, 0 0 20px #ff0000;
+  }
+  .led-num.bump { animation: bump .25s; }
+  @keyframes bump {
+    50% { transform: scale(1.15); }
+  }
+  .board-name { color: #ffd34d; margin-top: 8px; font-size: 20px; }
+
+  @media (max-width: 700px) {
+    .led-wrap { font-size: 64px; }
+    .fruit { font-size: 44px; }
+    .stage { min-height: 300px; }
+  }
+
+
+							</style>
+                        </head>
+                        <body>
+                            <!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>과일로 배우는 덧셈 뺄셈</title>
+<style>
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+    background: linear-gradient(160deg, #fff7e6, #e8f6ff);
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ===== 상단 컨트롤 바 ===== */
+  .topbar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 18px;
+    background: #fff;
+    box-shadow: 0 4px 14px rgba(0,0,0,.1);
+  }
+
+  select, input {
+    font-size: 20px;
+    padding: 10px 14px;
+    border: 2px solid #ffb84d;
+    border-radius: 12px;
+    outline: none;
+    background: #fffdf8;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  select:focus, input:focus {
+    border-color: #ff8800;
+    box-shadow: 0 0 0 4px rgba(255,136,0,.2);
+  }
+  input { width: 120px; text-align: center; }
+
+  .go-btn {
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: #fff;
+    padding: 10px 32px;
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    background: linear-gradient(135deg, #ff7a18, #ff3d68);
+    box-shadow: 0 6px 0 #c92a4d, 0 10px 18px rgba(255,61,104,.4);
+    transition: transform .1s, box-shadow .1s, filter .2s;
+  }
+  .go-btn:hover  { filter: brightness(1.1); }
+  .go-btn:active {
+    transform: translateY(5px);
+    box-shadow: 0 1px 0 #c92a4d, 0 4px 8px rgba(255,61,104,.4);
+  }
+
+  /* ===== 메인 영역 ===== */
+  .main {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    padding: 24px;
+    flex-wrap: wrap;
+  }
+
+  .stage {
+    width: min(720px, 100%);
+    min-height: 420px;
+    background: #fff;
+    border-radius: 24px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.12);
+    padding: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-content: center;
+    gap: 6px;
+    position: relative;
+  }
+
+  .hint {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 20px;
+    font-size: 24px;
+    line-height: 1.5;
+    color: #999;
+    pointer-events: none;
+  }
+
+  .fruit {
+    font-size: 54px;
+    line-height: 1;
+    padding: 4px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    user-select: none;
+    animation: appear .4s ease-out backwards;
+    transition: transform .15s;
+  }
+  .fruit:hover { transform: scale(1.2) rotate(-6deg); }
+
+  .fruit.pop { animation: pop .3s ease-in forwards; pointer-events: none; }
+
+  /* 사라진 과일: 보이지 않지만 자리는 그대로 유지 (재정렬 방지) */
+  .fruit.gone {
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  @keyframes appear {
+    from { transform: scale(0) rotate(-90deg); opacity: 0; }
+    to   { transform: scale(1) rotate(0);      opacity: 1; }
+  }
+  @keyframes pop {
+    0%   { transform: scale(1);   opacity: 1; }
+    40%  { transform: scale(1.5); opacity: 1; }
+    100% { transform: scale(0);   opacity: 0; }
+  }
+
+  /* ===== 전광판 ===== */
+  .board {
+    background: #111;
+    border: 6px solid #444;
+    border-radius: 18px;
+    padding: 18px 26px;
+    text-align: center;
+    box-shadow: 0 8px 24px rgba(0,0,0,.35), inset 0 0 20px #000;
+  }
+  .board-title {
+    color: #aaa;
+    font-size: 16px;
+    margin-bottom: 8px;
+    letter-spacing: 2px;
+  }
+  .led-wrap {
+    position: relative;
+    font-family: "Courier New", monospace;
+    font-weight: bold;
+    font-size: 96px;
+    line-height: 1.1;
+    letter-spacing: 8px;
+    padding: 0 6px;
+  }
+  .led-ghost {
+    color: #2a0a0a;            /* 꺼진 LED 느낌 */
+  }
+  .led-num {
+    position: absolute;
+    inset: 0;
+    text-align: right;
+    padding-right: 14px;
+    color: #ff2a2a;
+    text-shadow: 0 0 8px #ff2a2a, 0 0 20px #ff0000;
+  }
+  .led-num.bump { animation: bump .25s; }
+  @keyframes bump {
+    50% { transform: scale(1.15); }
+  }
+  .board-name { color: #ffd34d; margin-top: 8px; font-size: 20px; }
+
+  @media (max-width: 700px) {
+    .led-wrap { font-size: 64px; }
+    .fruit { font-size: 44px; }
+    .stage { min-height: 300px; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="topbar">
+    <select id="fruitSelect">
+      <option value="apple">🍎 사과</option>
+      <option value="banana">🍌 바나나</option>
+      <option value="grape">🍇 포도</option>
+    </select>
+    <input id="numInput" type="text" inputmode="numeric" maxlength="3" placeholder="숫자">
+    <button id="goBtn" class="go-btn">GO!</button>
+  </div>
+
+  <div class="main">
+    <div class="stage" id="stage">
+      <div class="hint" id="hint">과일과 숫자를 고르고<br>GO! 를 눌러 보세요 👆</div>
+    </div>
+
+    <div class="board">
+      <div class="board-title">📟 남은 개수</div>
+      <div class="led-wrap">
+        <span class="led-ghost">888</span>
+        <span class="led-num" id="ledNum">000</span>
+      </div>
+      <div class="board-name" id="boardName">-</div>
+    </div>
+  </div>
+
+<script>
+  const FRUITS = {
+    apple:  { emoji: "🍎", name: "사과" },
+    banana: { emoji: "🍌", name: "바나나" },
+    grape:  { emoji: "🍇", name: "포도" }
+  };
+  const MAX = 100;
+
+  const select    = document.getElementById("fruitSelect");
+  const input     = document.getElementById("numInput");
+  const goBtn     = document.getElementById("goBtn");
+  const stage     = document.getElementById("stage");
+  const hint      = document.getElementById("hint");
+  const ledNum    = document.getElementById("ledNum");
+  const boardName = document.getElementById("boardName");
+
+  let count = 0;
+
+  function updateBoard() {
+    ledNum.textContent = String(count).padStart(3, "0");
+    ledNum.classList.remove("bump");
+    void ledNum.offsetWidth;          // 애니메이션 재시작
+    ledNum.classList.add("bump");
+  }
+
+  function setHint(html) {
+    hint.innerHTML = html;
+    hint.style.display = html ? "flex" : "none";
+  }
+
+  function go() {
+    const n = parseInt(input.value, 10);
+    if (isNaN(n) || n < 0 || n > MAX) {
+      alert(`0 ~ ${MAX} 사이의 숫자를 입력해 주세요!`);
+      input.focus();
+      return;
+    }
+
+    const fruit = FRUITS[select.value];
+
+    // 기존 과일(숨겨진 것 포함) 모두 제거
+    stage.querySelectorAll(".fruit").forEach(el => el.remove());
+
+    count = n;
+    boardName.textContent = fruit.name;
+    updateBoard();
+
+    if (n === 0) { setHint("0개예요! 😅"); return; }
+    setHint("");
+
+    for (let i = 0; i < n; i++) {
+      const btn = document.createElement("button");
+      btn.className = "fruit";
+      btn.textContent = fruit.emoji;
+      btn.setAttribute("aria-label", fruit.name);
+      btn.style.animationDelay = (i * 0.02) + "s";
+      btn.addEventListener("click", () => removeFruit(btn));
+      stage.appendChild(btn);
+    }
+  }
+
+  function removeFruit(el) {
+    if (el.classList.contains("pop")) return;   // 중복 클릭 방지
+    el.classList.add("pop");
+    count--;
+    updateBoard();
+    setTimeout(() => {
+      el.classList.add("gone");                 // remove() 대신 숨기기만 → 자리 유지
+      if (count === 0) setHint("🎉 모두 사라졌어요! 0개 🎉");
+    }, 300);
+  }
+
+  goBtn.addEventListener("click", go);
+  input.addEventListener("keydown", e => { if (e.key === "Enter") go(); });
+  input.addEventListener("input", () => {        // 숫자만 입력되게
+    input.value = input.value.replace(/\D/g, "");
+  });
+</script>
+</body>
+</html>
+
+
+
+							<script>
+                            	
+  const FRUITS = {
+    apple:  { emoji: "🍎", name: "사과" },
+    banana: { emoji: "🍌", name: "바나나" },
+    grape:  { emoji: "🍇", name: "포도" }
+  };
+  const MAX = 100;
+
+  const select    = document.getElementById("fruitSelect");
+  const input     = document.getElementById("numInput");
+  const goBtn     = document.getElementById("goBtn");
+  const stage     = document.getElementById("stage");
+  const hint      = document.getElementById("hint");
+  const ledNum    = document.getElementById("ledNum");
+  const boardName = document.getElementById("boardName");
+
+  let count = 0;
+
+  function updateBoard() {
+    ledNum.textContent = String(count).padStart(3, "0");
+    ledNum.classList.remove("bump");
+    void ledNum.offsetWidth;          // 애니메이션 재시작
+    ledNum.classList.add("bump");
+  }
+
+  function setHint(html) {
+    hint.innerHTML = html;
+    hint.style.display = html ? "flex" : "none";
+  }
+
+  function go() {
+    const n = parseInt(input.value, 10);
+    if (isNaN(n) || n < 0 || n > MAX) {
+      alert(`0 ~ ${MAX} 사이의 숫자를 입력해 주세요!`);
+      input.focus();
+      return;
+    }
+
+    const fruit = FRUITS[select.value];
+
+    // 기존 과일(숨겨진 것 포함) 모두 제거
+    stage.querySelectorAll(".fruit").forEach(el => el.remove());
+
+    count = n;
+    boardName.textContent = fruit.name;
+    updateBoard();
+
+    if (n === 0) { setHint("0개예요! 😅"); return; }
+    setHint("");
+
+    for (let i = 0; i < n; i++) {
+      const btn = document.createElement("button");
+      btn.className = "fruit";
+      btn.textContent = fruit.emoji;
+      btn.setAttribute("aria-label", fruit.name);
+      btn.style.animationDelay = (i * 0.02) + "s";
+      btn.addEventListener("click", () => removeFruit(btn));
+      stage.appendChild(btn);
+    }
+  }
+
+  function removeFruit(el) {
+    if (el.classList.contains("pop")) return;   // 중복 클릭 방지
+    el.classList.add("pop");
+    count--;
+    updateBoard();
+    setTimeout(() => {
+      el.classList.add("gone");                 // remove() 대신 숨기기만 → 자리 유지
+      if (count === 0) setHint("🎉 모두 사라졌어요! 0개 🎉");
+    }, 300);
+  }
+
+  goBtn.addEventListener("click", go);
+  input.addEventListener("keydown", e => { if (e.key === "Enter") go(); });
+  input.addEventListener("input", () => {        // 숫자만 입력되게
+    input.value = input.value.replace(/\D/g, "");
+  });
+
+
+							</script>
+                        </body>
+                        </html>
+                    
