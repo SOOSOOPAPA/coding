@@ -1,0 +1,1286 @@
+
+                        <!DOCTYPE html>
+                        <html lang="en">
+                        <head>
+                            <meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+							<style>
+								body {
+									background-color: white; /* Ensure the iframe has a white background */
+								}
+
+								
+  :root{
+    --bg:#0f172a; --panel:#1e293b; --panel2:#334155;
+    --text:#e2e8f0; --accent:#38bdf8; --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; min-height:100vh; background:linear-gradient(160deg,#0f172a,#1e1b4b);
+    color:var(--text); font-family:"Pretendard","Malgun Gothic","Apple SD Gothic Neo",sans-serif;
+    padding-bottom:150px;
+  }
+  header{
+    position:sticky; top:0; z-index:20; background:rgba(15,23,42,.95);
+    backdrop-filter:blur(6px); padding:12px 16px 10px; border-bottom:1px solid var(--panel2);
+  }
+  .title-row{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;}
+  h1{margin:0; font-size:1.25rem;}
+  #resetBtn{
+    background:var(--panel2); color:var(--text); border:none; border-radius:8px;
+    padding:6px 12px; cursor:pointer; font-size:.85rem;
+  }
+  #resetBtn:hover{background:#475569;}
+  #seasonBar{display:flex; flex-wrap:wrap; gap:10px 12px; padding-top:4px;}
+  .season-btn{
+    position:relative; background:var(--panel); color:var(--text);
+    border:2px solid var(--panel2); border-radius:10px; padding:8px 16px;
+    font-size:.95rem; cursor:pointer; transition:.15s;
+  }
+  .season-btn:hover{border-color:var(--accent); transform:translateY(-2px);}
+  .season-btn.active{background:var(--accent); color:#06283d; border-color:var(--accent); font-weight:700;}
+  .badge{
+    position:absolute; top:-8px; right:-8px; min-width:20px; height:20px; padding:0 5px;
+    background:var(--bad); color:#fff; border-radius:10px; font-size:.7rem; font-weight:700;
+    display:flex; align-items:center; justify-content:center; box-shadow:0 1px 4px rgba(0,0,0,.5);
+  }
+
+  main{padding:28px 110px 20px 20px; min-height:50vh; display:flex; align-items:center; justify-content:center;}
+  #board{display:flex; flex-wrap:wrap; gap:14px; justify-content:center; max-width:1100px;}
+  .guide{text-align:center; color:#94a3b8; font-size:1.15rem; line-height:1.9;}
+  .card{
+    background:var(--panel); border:2px solid var(--panel2); color:#fff;
+    font-size:1.6rem; font-weight:700; letter-spacing:.12em;
+    padding:14px 22px; border-radius:14px; cursor:pointer; user-select:none;
+    transition:.15s; font-family:inherit;
+  }
+  .card:hover{border-color:var(--accent); transform:translateY(-3px);}
+  .card.revealed{cursor:default; letter-spacing:.02em; animation:pop .45s ease;}
+  .card.voice{background:#14532d; border-color:var(--ok); color:#dcfce7;}
+  .card.click{background:#78350f; border-color:var(--warn); color:#fef3c7;}
+  .card.revealed:hover{transform:none;}
+  @keyframes pop{0%{transform:scale(.7);}60%{transform:scale(1.15);}100%{transform:scale(1);}}
+
+  /* 전광판 */
+  #scoreboard{
+    position:fixed; right:14px; top:50%; transform:translateY(-60%); z-index:15;
+    background:#050505; border:3px solid #444; border-radius:10px; padding:8px 10px 10px;
+    text-align:center; width:84px; box-shadow:0 0 14px rgba(255,60,30,.25), inset 0 0 10px #000;
+  }
+  #scoreboard .lbl{font-size:.68rem; color:#aaa; margin-bottom:4px;}
+  #scoreboard .num{
+    font-family:"Courier New",monospace; font-size:2.3rem; font-weight:900; color:#ff3b1f;
+    text-shadow:0 0 8px #ff3b1f, 0 0 16px rgba(255,59,31,.6); line-height:1.1;
+  }
+  #scoreboard .num.tick{animation:tick .35s;}
+  @keyframes tick{0%{transform:scale(1.4); color:#ffd2c9;}100%{transform:scale(1);}}
+
+  /* 하단 바 */
+  #bottom{
+    position:fixed; left:0; right:0; bottom:0; z-index:20; background:rgba(15,23,42,.97);
+    border-top:1px solid var(--panel2); padding:10px 16px 14px;
+  }
+  #toast{
+    position:absolute; left:50%; top:-46px; transform:translateX(-50%);
+    background:var(--panel); border:1px solid var(--panel2); padding:8px 18px; border-radius:20px;
+    font-weight:700; opacity:0; transition:opacity .25s; pointer-events:none; white-space:nowrap;
+  }
+  #toast.show{opacity:1;}
+  #toast.ok{color:var(--ok); border-color:var(--ok);}
+  #toast.bad{color:var(--bad); border-color:var(--bad);}
+  #transcriptRow{display:flex; align-items:center; gap:8px; margin-bottom:10px; min-height:34px;}
+  #transcriptRow .tag{font-size:.8rem; color:#94a3b8; flex-shrink:0;}
+  #transcript{
+    flex:1; font-size:1.2rem; color:#fde68a; min-height:30px; padding:4px 10px;
+    background:#0b1220; border-radius:8px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  #controlRow{display:flex; gap:10px; align-items:center;}
+  #micBtn{
+    display:flex; align-items:center; gap:8px; border:none; border-radius:10px;
+    padding:10px 16px; cursor:pointer; background:var(--panel2); color:var(--text);
+    font-size:.95rem; font-weight:700; flex-shrink:0;
+  }
+  #micBtn .dot{width:10px; height:10px; border-radius:50%; background:#64748b;}
+  #micBtn.on{background:#7f1d1d;}
+  #micBtn.on .dot{background:#ff4d4d; animation:blink 1s infinite;}
+  @keyframes blink{50%{opacity:.25;}}
+  #answerInput{
+    flex:1; padding:11px 14px; border-radius:10px; border:2px solid var(--panel2);
+    background:#0b1220; color:#fff; font-size:1rem; outline:none; min-width:0;
+  }
+  #answerInput:focus{border-color:var(--accent);}
+  #submitBtn{
+    border:none; border-radius:10px; padding:11px 18px; background:var(--accent);
+    color:#06283d; font-weight:700; cursor:pointer; flex-shrink:0;
+  }
+
+  /* 클리어 오버레이 */
+  #overlay{
+    position:fixed; inset:0; background:rgba(0,0,0,.75); z-index:50;
+    display:none; align-items:center; justify-content:center; flex-direction:column; gap:12px;
+  }
+  #overlay.show{display:flex;}
+  #overlay .big{font-size:2.6rem; font-weight:900; color:#fde047; animation:pop .6s;}
+  #overlay .small{color:#cbd5e1;}
+
+  @media (max-width:640px){
+    main{padding-right:100px;}
+    .card{font-size:1.25rem; padding:10px 14px;}
+    #micBtn span.txt{display:none;}
+  }
+
+
+							</style>
+                        </head>
+                        <body>
+                            <!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>카봇 초성 퀴즈</title>
+<style>
+  :root{
+    --bg:#0f172a; --panel:#1e293b; --panel2:#334155;
+    --text:#e2e8f0; --accent:#38bdf8; --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; min-height:100vh; background:linear-gradient(160deg,#0f172a,#1e1b4b);
+    color:var(--text); font-family:"Pretendard","Malgun Gothic","Apple SD Gothic Neo",sans-serif;
+    padding-bottom:150px;
+  }
+  header{
+    position:sticky; top:0; z-index:20; background:rgba(15,23,42,.95);
+    backdrop-filter:blur(6px); padding:12px 16px 10px; border-bottom:1px solid var(--panel2);
+  }
+  .title-row{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;}
+  h1{margin:0; font-size:1.25rem;}
+  #resetBtn{
+    background:var(--panel2); color:var(--text); border:none; border-radius:8px;
+    padding:6px 12px; cursor:pointer; font-size:.85rem;
+  }
+  #resetBtn:hover{background:#475569;}
+  #seasonBar{display:flex; flex-wrap:wrap; gap:10px 12px; padding-top:4px;}
+  .season-btn{
+    position:relative; background:var(--panel); color:var(--text);
+    border:2px solid var(--panel2); border-radius:10px; padding:8px 16px;
+    font-size:.95rem; cursor:pointer; transition:.15s;
+  }
+  .season-btn:hover{border-color:var(--accent); transform:translateY(-2px);}
+  .season-btn.active{background:var(--accent); color:#06283d; border-color:var(--accent); font-weight:700;}
+  .badge{
+    position:absolute; top:-8px; right:-8px; min-width:20px; height:20px; padding:0 5px;
+    background:var(--bad); color:#fff; border-radius:10px; font-size:.7rem; font-weight:700;
+    display:flex; align-items:center; justify-content:center; box-shadow:0 1px 4px rgba(0,0,0,.5);
+  }
+
+  main{padding:28px 110px 20px 20px; min-height:50vh; display:flex; align-items:center; justify-content:center;}
+  #board{display:flex; flex-wrap:wrap; gap:14px; justify-content:center; max-width:1100px;}
+  .guide{text-align:center; color:#94a3b8; font-size:1.15rem; line-height:1.9;}
+  .card{
+    background:var(--panel); border:2px solid var(--panel2); color:#fff;
+    font-size:1.6rem; font-weight:700; letter-spacing:.12em;
+    padding:14px 22px; border-radius:14px; cursor:pointer; user-select:none;
+    transition:.15s; font-family:inherit;
+  }
+  .card:hover{border-color:var(--accent); transform:translateY(-3px);}
+  .card.revealed{cursor:default; letter-spacing:.02em; animation:pop .45s ease;}
+  .card.voice{background:#14532d; border-color:var(--ok); color:#dcfce7;}
+  .card.click{background:#78350f; border-color:var(--warn); color:#fef3c7;}
+  .card.revealed:hover{transform:none;}
+  @keyframes pop{0%{transform:scale(.7);}60%{transform:scale(1.15);}100%{transform:scale(1);}}
+
+  /* 전광판 */
+  #scoreboard{
+    position:fixed; right:14px; top:50%; transform:translateY(-60%); z-index:15;
+    background:#050505; border:3px solid #444; border-radius:10px; padding:8px 10px 10px;
+    text-align:center; width:84px; box-shadow:0 0 14px rgba(255,60,30,.25), inset 0 0 10px #000;
+  }
+  #scoreboard .lbl{font-size:.68rem; color:#aaa; margin-bottom:4px;}
+  #scoreboard .num{
+    font-family:"Courier New",monospace; font-size:2.3rem; font-weight:900; color:#ff3b1f;
+    text-shadow:0 0 8px #ff3b1f, 0 0 16px rgba(255,59,31,.6); line-height:1.1;
+  }
+  #scoreboard .num.tick{animation:tick .35s;}
+  @keyframes tick{0%{transform:scale(1.4); color:#ffd2c9;}100%{transform:scale(1);}}
+
+  /* 하단 바 */
+  #bottom{
+    position:fixed; left:0; right:0; bottom:0; z-index:20; background:rgba(15,23,42,.97);
+    border-top:1px solid var(--panel2); padding:10px 16px 14px;
+  }
+  #toast{
+    position:absolute; left:50%; top:-46px; transform:translateX(-50%);
+    background:var(--panel); border:1px solid var(--panel2); padding:8px 18px; border-radius:20px;
+    font-weight:700; opacity:0; transition:opacity .25s; pointer-events:none; white-space:nowrap;
+  }
+  #toast.show{opacity:1;}
+  #toast.ok{color:var(--ok); border-color:var(--ok);}
+  #toast.bad{color:var(--bad); border-color:var(--bad);}
+  #transcriptRow{display:flex; align-items:center; gap:8px; margin-bottom:10px; min-height:34px;}
+  #transcriptRow .tag{font-size:.8rem; color:#94a3b8; flex-shrink:0;}
+  #transcript{
+    flex:1; font-size:1.2rem; color:#fde68a; min-height:30px; padding:4px 10px;
+    background:#0b1220; border-radius:8px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  #controlRow{display:flex; gap:10px; align-items:center;}
+  #micBtn{
+    display:flex; align-items:center; gap:8px; border:none; border-radius:10px;
+    padding:10px 16px; cursor:pointer; background:var(--panel2); color:var(--text);
+    font-size:.95rem; font-weight:700; flex-shrink:0;
+  }
+  #micBtn .dot{width:10px; height:10px; border-radius:50%; background:#64748b;}
+  #micBtn.on{background:#7f1d1d;}
+  #micBtn.on .dot{background:#ff4d4d; animation:blink 1s infinite;}
+  @keyframes blink{50%{opacity:.25;}}
+  #answerInput{
+    flex:1; padding:11px 14px; border-radius:10px; border:2px solid var(--panel2);
+    background:#0b1220; color:#fff; font-size:1rem; outline:none; min-width:0;
+  }
+  #answerInput:focus{border-color:var(--accent);}
+  #submitBtn{
+    border:none; border-radius:10px; padding:11px 18px; background:var(--accent);
+    color:#06283d; font-weight:700; cursor:pointer; flex-shrink:0;
+  }
+
+  /* 클리어 오버레이 */
+  #overlay{
+    position:fixed; inset:0; background:rgba(0,0,0,.75); z-index:50;
+    display:none; align-items:center; justify-content:center; flex-direction:column; gap:12px;
+  }
+  #overlay.show{display:flex;}
+  #overlay .big{font-size:2.6rem; font-weight:900; color:#fde047; animation:pop .6s;}
+  #overlay .small{color:#cbd5e1;}
+
+  @media (max-width:640px){
+    main{padding-right:100px;}
+    .card{font-size:1.25rem; padding:10px 14px;}
+    #micBtn span.txt{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title-row">
+    <h1>🚗 카봇 초성 퀴즈</h1>
+    <button id="resetBtn">처음으로</button>
+  </div>
+  <div id="seasonBar"></div>
+</header>
+
+<main>
+  <div id="board">
+    <div class="guide">
+      위에서 시즌을 선택하면 게임이 시작돼요!<br>
+      카봇 이름을 <b>말하거나</b> 입력하고, 초성 카드를 <b>클릭</b>하면 정답이 공개돼요.<br>
+      <small>(발음이 비슷하면 한두 글자 틀려도 정답으로 인정)</small>
+    </div>
+  </div>
+</main>
+
+<div id="scoreboard">
+  <div class="lbl">남은 카봇</div>
+  <div class="num" id="scoreNum">--</div>
+</div>
+
+<div id="bottom">
+  <div id="toast"></div>
+  <div id="transcriptRow">
+    <span class="tag">🎧 인식된 음성</span>
+    <div id="transcript">(음성 인식을 켜면 여기에 실시간으로 표시됩니다)</div>
+  </div>
+  <div id="controlRow">
+    <button id="micBtn"><span class="dot"></span><span class="txt">음성인식 OFF</span></button>
+    <input id="answerInput" type="text" placeholder="키보드로 카봇 이름 입력 후 Enter" autocomplete="off">
+    <button id="submitBtn">확인</button>
+  </div>
+</div>
+
+<div id="overlay">
+  <div class="big">🎉 모두 맞췄어요!</div>
+  <div class="small">잠시 후 처음 화면으로 돌아갑니다...</div>
+</div>
+
+<script>
+/* ================== 데이터 ================== */
+const RAW = `
+가고토스프라임(7)
+가디언트(10)
+고람빅쿵(8)
+골드렉스(3)
+골드렉스레스큐(4)
+그리핑크스프라임(8)
+나노티스뱅(10)
+나이트(2)
+나이트호퍼(11)
+다이어(4)
+다이어EX(4)
+댄디(1)
+댄디119(1)
+댄디앰뷸런스X(9)
+도저밤밤(12)
+독꼬리프라임(7)
+듀크(5)
+드라고닉스(5)
+드럼킹(13)
+드로캅(12)
+드릴버스트(12)
+디고베어젬(13)
+디메트로쿵(8)
+디스크캐논프라임(8)
+딜로포쿵(8)
+라란자(12)
+라이캅스(7)
+라이프X(14)
+랩터쿵(7)
+럭키(6)
+럭키펀치(6)
+레드와일러(11)
+레미밤밤(12)
+레포스(13)
+로더(10)
+로드세이버(2)
+로어젬(13)
+로어세이버(2)
+록캔(11)
+루크(2)
+리프(4)
+마이스터(2)
+마이티가드(3)
+마이티가드X(14)
+마이티로(10)
+마하로드(5)
+마하피스(5)
+맥스도저(11)
+메가볼드(5)
+메디언트(7)
+모반(9)
+모사쿵(쿵)
+모스쿵(쿵)
+무간프라임(7)
+미리내프라임(7)
+버디가드(7)
+베노사프라임(7)
+베어하이더(11)
+본(2)
+브라키쿵(쿵)
+브레이로드(5)
+브레이피스(5)
+브론테로빅쿵(8)
+비트런(5)
+빅터(14)
+빌디언(5)
+사파리세이버(13)
+샌드버스터(11)
+서포티붐(12)
+세이버(2)
+소닉붐(10)
+슈퍼패트론(4)
+스나이퍼젬(13)
+스밀로쿵(쿵)
+스카이(1)
+스카이스와트(1)
+스카이스와트X(9)
+스카이스타(15)
+스크류붐바(12)
+스키드(4)
+스타가디언(15)
+스타블래스터(5)
+스타비(5)
+스타피너(6)
+스터번(13)
+스테쿵(쿵)
+스톰(1)
+스톰X(9)
+스톰다이버(12)
+스피너(7)
+스피너블(7)
+썬런뱅(10)
+아레스밤밤(12)
+아르시노쿵(8)
+아르케쿵(7)
+아머다이저(5)
+아머포스(5)
+아이누크(6)
+아이언스타(15)
+아이언트(6)
+아티(2)
+아티택시(2)
+안킬로쿵(7)
+앵그리퍼프(7)
+에반프라임(5)
+에이스(1)
+에이스레스큐(1)
+에이스레스큐X(9)
+오토소닉(5)
+우가바(3)
+우가바캡틴(4)
+울티맥스(9)
+윙버드젬(13)
+유니크루저(7)
+이구아드롭쿵(8)
+이그리붐(12)
+이글하이더(11)
+인피니티툴(13)
+일렉트롬(13)
+자이언트로더(10)
+자크뱅(10)
+자크레인뱅(10)
+잭슈트뱅(10)
+저스포스(11)
+제스티(5)
+제트렌(3)
+제트크루저(7)
+카이온프라임(7)
+캥복스젬(13)
+컨버스터(6)
+쿨가이더(11)
+큐어밤밤(12)
+크랜(5)
+킹가이더(11)
+킹가이즈(3)
+킹가이즈X(14)
+킹다이저(5)
+타이거붐(13)
+테로프라임(7)
+테이프삼총사(15)
+테크노마스터(8)
+토터젬(13)
+톡시젬(13)
+트루(2)
+트루폴리스(4)
+트리쿵(쿵)
+티라쿵(쿵)
+프테라드롭쿵(7)
+플레쿵(쿵)
+파워붐바(12)
+파워크루저(9)
+파이어스타(15)
+파이언트(7)
+파키케쿵(8)
+파라사쿵(8)
+패트론(4)
+패트론S(4)
+펀치(6)
+펀치마스터(15)
+페로뱅(10)
+페이저(10)
+펜타스톰(1)
+펜타스톰X(9)
+포레밤밤(12)
+폰(2)
+폴리스타(15)
+푸르디붐(12)
+프라우드제트(5)
+프론(1)
+프론폴리스(1)
+프론폴리스X(9)
+프테라쿵(쿵)
+프테라드롭쿵(7)
+피노쿵(쿵)
+피닉스프라임(7)
+하울러(13)
+하이퍼빌디언(5)
+하이퍼캅스(12)
+핫가이더(11)
+호스퍼스뱅(10)
+호크(1)
+호크X(12)
+호크하이(13)
+호프(15)
+황금티라쿵(14)
+케이캅스(3)
+`;
+
+/* 시즌별 데이터 구성 (중복 제거) */
+const SEASONS = {};
+RAW.split('\n').map(s => s.trim()).filter(Boolean).forEach(line => {
+  const m = line.match(/^(.+)\((\d+|쿵)\)$/);
+  if (!m) return;
+  const name = m[1], season = m[2];
+  (SEASONS[season] ||= []);
+  if (!SEASONS[season].includes(name)) SEASONS[season].push(name);
+});
+const SEASON_KEYS = [...Array.from({length:15}, (_, i) => String(i+1)), '쿵'].filter(k => SEASONS[k]);
+
+/* ================== 한글 유틸 ================== */
+const CHO = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+const isHangul = ch => ch >= '가' && ch <= '힣';
+const toChosung = name => [...name].map(ch => isHangul(ch) ? CHO[Math.floor((ch.charCodeAt(0)-0xAC00)/588)] : ch).join('');
+
+const LETTER = {A:'에이',B:'비',C:'씨',D:'디',E:'이',F:'에프',G:'지',H:'에이치',I:'아이',J:'제이',K:'케이',L:'엘',M:'엠',
+  N:'엔',O:'오',P:'피',Q:'큐',R:'알',S:'에스',T:'티',U:'유',V:'브이',W:'더블유',X:'엑스',Y:'와이',Z:'제트'};
+const DIGIT = ['영','일','이','삼','사','오','육','칠','팔','구'];
+
+/* 영문/숫자를 한글 발음으로 바꾸고 공백·기호 제거 */
+function norm(s){
+  let out = '';
+  for (const ch of s) {
+    const c = ch.toUpperCase();
+    if (isHangul(c)) out += c;
+    else if (LETTER[c]) out += LETTER[c];
+    else if (c >= '0' && c <= '9') out += DIGIT[+c];
+  }
+  return out;
+}
+
+/* 비슷한 발음 그룹 */
+function makeGroupMap(groups){
+  const m = {};
+  groups.forEach((g, gi) => g.forEach(i => m[i] = gi));
+  return m;
+}
+const CHO_SIM  = makeGroupMap([[0,1,15],[3,4,16],[7,8,17],[12,13,14],[9,10]]);
+const JUNG_SIM = makeGroupMap([[1,3,5,7],[10,11,15],[4,6],[8,12],[13,17],[0,2,9],[19,20],[16,20]]);
+const JONG_SIM = makeGroupMap([[1,2,3,9,24],[4,5,6],[7,12,13,19,20,22,23,25,27],[8,11,15],[10,16],[14,17,18,26]]);
+const JONG_NASAL = new Set([4,16,21]);
+
+function syllCost(a, b){
+  if (a === b) return 0;
+  const ca = a.charCodeAt(0)-0xAC00, cb = b.charCodeAt(0)-0xAC00;
+  const ac = Math.floor(ca/588), bc = Math.floor(cb/588);
+  const aj = Math.floor((ca%588)/28), bj = Math.floor((cb%588)/28);
+  const af = ca%28, bf = cb%28;
+  let cost = 0;
+  if (ac !== bc) cost += (CHO_SIM[ac] !== undefined && CHO_SIM[ac] === CHO_SIM[bc]) ? 0.15 : 0.5;
+  if (aj !== bj) cost += (JUNG_SIM[aj] !== undefined && JUNG_SIM[aj] === JUNG_SIM[bj]) ? 0.2 : 0.6;
+  if (af !== bf) {
+    if (JONG_SIM[af] !== undefined && JONG_SIM[af] === JONG_SIM[bf]) cost += 0.1;
+    else if (JONG_NASAL.has(af) && JONG_NASAL.has(bf)) cost += 0.25;
+    else if (af === 0 || bf === 0) cost += 0.35;
+    else cost += 0.45;
+  }
+  return Math.min(1, cost);
+}
+
+/* 음절 단위 편집 거리 (발음 유사도 반영) */
+function dist(a, b){
+  const n = a.length, m = b.length;
+  let prev = Array.from({length:m+1}, (_, j) => j);
+  for (let i = 1; i <= n; i++) {
+    const cur = [i];
+    for (let j = 1; j <= m; j++) {
+      cur[j] = Math.min(prev[j]+1, cur[j-1]+1, prev[j-1] + syllCost(a[i-1], b[j-1]));
+    }
+    prev = cur;
+  }
+  return prev[m];
+}
+
+/* 이름 길이에 따른 허용 오차 */
+function threshold(len){
+  if (len <= 2) return 0.5;
+  if (len === 3) return 1.0;
+  if (len <= 5) return 1.5;
+  return 2.0;
+}
+
+/* ================== 게임 상태 ================== */
+const $ = id => document.getElementById(id);
+const seasonBar = $('seasonBar'), board = $('board'), scoreNum = $('scoreNum');
+const transcriptEl = $('transcript'), toastEl = $('toast');
+const answerInput = $('answerInput'), micBtn = $('micBtn'), overlay = $('overlay');
+
+let game = null;   // {season, items:[{name,norm,revealed,el}], remaining}
+let finishing = false;
+
+const GUIDE_HTML = board.innerHTML;
+
+/* 시즌 버튼 생성 */
+SEASON_KEYS.forEach(key => {
+  const btn = document.createElement('button');
+  btn.className = 'season-btn';
+  btn.dataset.season = key;
+  btn.innerHTML = `${key === '쿵' ? '쿵' : '시즌 ' + key}<span class="badge">${SEASONS[key].length}</span>`;
+  btn.addEventListener('click', () => startGame(key));
+  seasonBar.appendChild(btn);
+});
+
+function shuffle(arr){
+  const a = arr.slice();
+  for (let i = a.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function setScore(n, animate=true){
+  scoreNum.textContent = n === null ? '--' : String(n);
+  if (animate) {
+    scoreNum.classList.remove('tick');
+    void scoreNum.offsetWidth;
+    scoreNum.classList.add('tick');
+  }
+}
+
+let micAutoTried = false;
+function startGame(season){
+  if (finishing) return;
+  document.querySelectorAll('.season-btn').forEach(b => b.classList.toggle('active', b.dataset.season === season));
+  const names = shuffle(SEASONS[season]);
+  board.innerHTML = '';
+  game = { season, remaining: names.length, items: [] };
+  names.forEach(name => {
+    const el = document.createElement('button');
+    el.className = 'card';
+    el.textContent = toChosung(name);
+    const item = { name, norm: norm(name), revealed: false, el };
+    el.addEventListener('click', () => reveal(item, 'click'));
+    game.items.push(item);
+    board.appendChild(el);
+  });
+  setScore(game.remaining);
+  answerInput.focus();
+  if (!micAutoTried && !micOn) { micAutoTried = true; startMic(); }
+}
+
+function reveal(item, how){
+  if (!game || item.revealed || finishing) return;
+  item.revealed = true;
+  item.el.textContent = item.name;
+  item.el.classList.add('revealed', how === 'voice' ? 'voice' : 'click');
+  game.remaining--;
+  setScore(game.remaining);
+  if (how !== 'click') showToast('✅ 정답! ' + item.name, 'ok');
+  if (game.remaining === 0) finishGame();
+}
+
+function finishGame(){
+  finishing = true;
+  setTimeout(() => {
+    overlay.classList.add('show');
+    setTimeout(() => {
+      overlay.classList.remove('show');
+      resetToInitial();
+      finishing = false;
+    }, 3000);
+  }, 600);
+}
+
+function resetToInitial(){
+  game = null;
+  document.querySelectorAll('.season-btn').forEach(b => b.classList.remove('active'));
+  board.innerHTML = GUIDE_HTML;
+  setScore(null, false);
+}
+$('resetBtn').addEventListener('click', () => { if (!finishing) resetToInitial(); });
+
+let toastTimer;
+function showToast(msg, type){
+  toastEl.textContent = msg;
+  toastEl.className = 'show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.className = '', 1800);
+}
+
+/* ================== 정답 판정 ================== */
+/* 단위 문자열(unit)에 가장 가까운 카봇 찾기. 허용 범위 밖이면 null */
+function findBest(unit){
+  let best = null;
+  for (const item of game.items) {
+    const d = dist(unit, item.norm);
+    if (d > threshold(item.norm.length) + 1e-9) continue;
+    if (!best || d < best.d - 1e-9 || (Math.abs(d - best.d) < 1e-9 && best.item.revealed && !item.revealed)) {
+      best = { item, d };
+    }
+  }
+  return best;
+}
+
+/* 텍스트에서 카봇 이름을 찾아 공개. 공개된 개수 반환 */
+function processText(text, how='voice'){
+  if (!game || finishing) return 0;
+  const tokens = text.split(/\s+/).filter(Boolean);
+  const n = tokens.length;
+  if (!n) return 0;
+  const used = Array(n).fill(false);
+  let count = 0;
+  for (let len = Math.min(n, 4); len >= 1; len--) {
+    for (let s = 0; s + len <= n; s++) {
+      if (used.slice(s, s+len).some(Boolean)) continue;
+      const unit = norm(tokens.slice(s, s+len).join(''));
+      if (!unit) continue;
+      const best = findBest(unit);
+      if (!best) continue;
+      for (let k = s; k < s+len; k++) used[k] = true;
+      if (!best.item.revealed) { reveal(best.item, how); count++; }
+    }
+  }
+  return count;
+}
+
+/* ================== 키보드 입력 ================== */
+function submitAnswer(){
+  const v = answerInput.value.trim();
+  if (!v) return;
+  if (!game) { showToast('먼저 시즌을 선택하세요', 'bad'); return; }
+  const c = processText(v, 'typed');
+  if (c === 0) showToast('❌ 일치하는 카봇이 없어요', 'bad');
+  answerInput.value = '';
+}
+$('submitBtn').addEventListener('click', submitAnswer);
+answerInput.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing) submitAnswer(); });
+
+/* ================== 음성 인식 ================== */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recog = null, micOn = false, interimTimer = null;
+
+function updateMicUI(){
+  micBtn.classList.toggle('on', micOn);
+  micBtn.querySelector('.txt').textContent = micOn ? '음성인식 ON' : '음성인식 OFF';
+}
+
+function startMic(){
+  if (!SR) {
+    transcriptEl.textContent = '이 브라우저는 음성 인식을 지원하지 않아요. Chrome 또는 Edge를 사용해주세요.';
+    return;
+  }
+  micOn = true;
+  updateMicUI();
+  transcriptEl.textContent = '듣고 있어요... 카봇 이름을 말해보세요!';
+
+  recog = new SR();
+  recog.lang = 'ko-KR';
+  recog.continuous = true;
+  recog.interimResults = true;
+  recog.maxAlternatives = 3;
+
+  recog.onresult = e => {
+    let interim = '', lastFinal = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const r = e.results[i];
+      if (r.isFinal) {
+        lastFinal = r[0].transcript;
+        for (let a = 0; a < r.length; a++) processText(r[a].transcript, 'voice');
+      } else {
+        interim += r[0].transcript;
+      }
+    }
+    transcriptEl.textContent = interim || lastFinal || transcriptEl.textContent;
+    clearTimeout(interimTimer);
+    if (interim) {
+      // 말이 잠깐 멈추면 중간 결과로도 판정 (긴 이름의 앞부분 오판 방지용 지연)
+      interimTimer = setTimeout(() => processText(interim, 'voice'), 600);
+    }
+  };
+  recog.onerror = e => {
+    if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+      micOn = false; updateMicUI();
+      transcriptEl.textContent = '마이크 권한이 필요해요. 주소창의 마이크 권한을 허용해주세요.';
+    }
+  };
+  recog.onend = () => {
+    if (micOn) setTimeout(() => { try { recog.start(); } catch (_) {} }, 250);
+  };
+  try { recog.start(); } catch (_) {}
+}
+
+function stopMic(){
+  micOn = false;
+  updateMicUI();
+  clearTimeout(interimTimer);
+  if (recog) { try { recog.stop(); } catch (_) {} }
+  transcriptEl.textContent = '(음성 인식이 꺼졌어요)';
+}
+
+micBtn.addEventListener('click', () => micOn ? stopMic() : startMic());
+</script>
+</body>
+</html>
+
+
+
+							<script>
+                            	
+/* ================== 데이터 ================== */
+const RAW = `
+가고토스프라임(7)
+가디언트(10)
+고람빅쿵(8)
+골드렉스(3)
+골드렉스레스큐(4)
+그리핑크스프라임(8)
+나노티스뱅(10)
+나이트(2)
+나이트호퍼(11)
+다이어(4)
+다이어EX(4)
+댄디(1)
+댄디119(1)
+댄디앰뷸런스X(9)
+도저밤밤(12)
+독꼬리프라임(7)
+듀크(5)
+드라고닉스(5)
+드럼킹(13)
+드로캅(12)
+드릴버스트(12)
+디고베어젬(13)
+디메트로쿵(8)
+디스크캐논프라임(8)
+딜로포쿵(8)
+라란자(12)
+라이캅스(7)
+라이프X(14)
+랩터쿵(7)
+럭키(6)
+럭키펀치(6)
+레드와일러(11)
+레미밤밤(12)
+레포스(13)
+로더(10)
+로드세이버(2)
+로어젬(13)
+로어세이버(2)
+록캔(11)
+루크(2)
+리프(4)
+마이스터(2)
+마이티가드(3)
+마이티가드X(14)
+마이티로(10)
+마하로드(5)
+마하피스(5)
+맥스도저(11)
+메가볼드(5)
+메디언트(7)
+모반(9)
+모사쿵(쿵)
+모스쿵(쿵)
+무간프라임(7)
+미리내프라임(7)
+버디가드(7)
+베노사프라임(7)
+베어하이더(11)
+본(2)
+브라키쿵(쿵)
+브레이로드(5)
+브레이피스(5)
+브론테로빅쿵(8)
+비트런(5)
+빅터(14)
+빌디언(5)
+사파리세이버(13)
+샌드버스터(11)
+서포티붐(12)
+세이버(2)
+소닉붐(10)
+슈퍼패트론(4)
+스나이퍼젬(13)
+스밀로쿵(쿵)
+스카이(1)
+스카이스와트(1)
+스카이스와트X(9)
+스카이스타(15)
+스크류붐바(12)
+스키드(4)
+스타가디언(15)
+스타블래스터(5)
+스타비(5)
+스타피너(6)
+스터번(13)
+스테쿵(쿵)
+스톰(1)
+스톰X(9)
+스톰다이버(12)
+스피너(7)
+스피너블(7)
+썬런뱅(10)
+아레스밤밤(12)
+아르시노쿵(8)
+아르케쿵(7)
+아머다이저(5)
+아머포스(5)
+아이누크(6)
+아이언스타(15)
+아이언트(6)
+아티(2)
+아티택시(2)
+안킬로쿵(7)
+앵그리퍼프(7)
+에반프라임(5)
+에이스(1)
+에이스레스큐(1)
+에이스레스큐X(9)
+오토소닉(5)
+우가바(3)
+우가바캡틴(4)
+울티맥스(9)
+윙버드젬(13)
+유니크루저(7)
+이구아드롭쿵(8)
+이그리붐(12)
+이글하이더(11)
+인피니티툴(13)
+일렉트롬(13)
+자이언트로더(10)
+자크뱅(10)
+자크레인뱅(10)
+잭슈트뱅(10)
+저스포스(11)
+제스티(5)
+제트렌(3)
+제트크루저(7)
+카이온프라임(7)
+캥복스젬(13)
+컨버스터(6)
+쿨가이더(11)
+큐어밤밤(12)
+크랜(5)
+킹가이더(11)
+킹가이즈(3)
+킹가이즈X(14)
+킹다이저(5)
+타이거붐(13)
+테로프라임(7)
+테이프삼총사(15)
+테크노마스터(8)
+토터젬(13)
+톡시젬(13)
+트루(2)
+트루폴리스(4)
+트리쿵(쿵)
+티라쿵(쿵)
+프테라드롭쿵(7)
+플레쿵(쿵)
+파워붐바(12)
+파워크루저(9)
+파이어스타(15)
+파이언트(7)
+파키케쿵(8)
+파라사쿵(8)
+패트론(4)
+패트론S(4)
+펀치(6)
+펀치마스터(15)
+페로뱅(10)
+페이저(10)
+펜타스톰(1)
+펜타스톰X(9)
+포레밤밤(12)
+폰(2)
+폴리스타(15)
+푸르디붐(12)
+프라우드제트(5)
+프론(1)
+프론폴리스(1)
+프론폴리스X(9)
+프테라쿵(쿵)
+프테라드롭쿵(7)
+피노쿵(쿵)
+피닉스프라임(7)
+하울러(13)
+하이퍼빌디언(5)
+하이퍼캅스(12)
+핫가이더(11)
+호스퍼스뱅(10)
+호크(1)
+호크X(12)
+호크하이(13)
+호프(15)
+황금티라쿵(14)
+케이캅스(3)
+`;
+
+/* 시즌별 데이터 구성 (중복 제거) */
+const SEASONS = {};
+RAW.split('\n').map(s => s.trim()).filter(Boolean).forEach(line => {
+  const m = line.match(/^(.+)\((\d+|쿵)\)$/);
+  if (!m) return;
+  const name = m[1], season = m[2];
+  (SEASONS[season] ||= []);
+  if (!SEASONS[season].includes(name)) SEASONS[season].push(name);
+});
+const SEASON_KEYS = [...Array.from({length:15}, (_, i) => String(i+1)), '쿵'].filter(k => SEASONS[k]);
+
+/* ================== 한글 유틸 ================== */
+const CHO = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+const isHangul = ch => ch >= '가' && ch <= '힣';
+const toChosung = name => [...name].map(ch => isHangul(ch) ? CHO[Math.floor((ch.charCodeAt(0)-0xAC00)/588)] : ch).join('');
+
+const LETTER = {A:'에이',B:'비',C:'씨',D:'디',E:'이',F:'에프',G:'지',H:'에이치',I:'아이',J:'제이',K:'케이',L:'엘',M:'엠',
+  N:'엔',O:'오',P:'피',Q:'큐',R:'알',S:'에스',T:'티',U:'유',V:'브이',W:'더블유',X:'엑스',Y:'와이',Z:'제트'};
+const DIGIT = ['영','일','이','삼','사','오','육','칠','팔','구'];
+
+/* 영문/숫자를 한글 발음으로 바꾸고 공백·기호 제거 */
+function norm(s){
+  let out = '';
+  for (const ch of s) {
+    const c = ch.toUpperCase();
+    if (isHangul(c)) out += c;
+    else if (LETTER[c]) out += LETTER[c];
+    else if (c >= '0' && c <= '9') out += DIGIT[+c];
+  }
+  return out;
+}
+
+/* 비슷한 발음 그룹 */
+function makeGroupMap(groups){
+  const m = {};
+  groups.forEach((g, gi) => g.forEach(i => m[i] = gi));
+  return m;
+}
+const CHO_SIM  = makeGroupMap([[0,1,15],[3,4,16],[7,8,17],[12,13,14],[9,10]]);
+const JUNG_SIM = makeGroupMap([[1,3,5,7],[10,11,15],[4,6],[8,12],[13,17],[0,2,9],[19,20],[16,20]]);
+const JONG_SIM = makeGroupMap([[1,2,3,9,24],[4,5,6],[7,12,13,19,20,22,23,25,27],[8,11,15],[10,16],[14,17,18,26]]);
+const JONG_NASAL = new Set([4,16,21]);
+
+function syllCost(a, b){
+  if (a === b) return 0;
+  const ca = a.charCodeAt(0)-0xAC00, cb = b.charCodeAt(0)-0xAC00;
+  const ac = Math.floor(ca/588), bc = Math.floor(cb/588);
+  const aj = Math.floor((ca%588)/28), bj = Math.floor((cb%588)/28);
+  const af = ca%28, bf = cb%28;
+  let cost = 0;
+  if (ac !== bc) cost += (CHO_SIM[ac] !== undefined && CHO_SIM[ac] === CHO_SIM[bc]) ? 0.15 : 0.5;
+  if (aj !== bj) cost += (JUNG_SIM[aj] !== undefined && JUNG_SIM[aj] === JUNG_SIM[bj]) ? 0.2 : 0.6;
+  if (af !== bf) {
+    if (JONG_SIM[af] !== undefined && JONG_SIM[af] === JONG_SIM[bf]) cost += 0.1;
+    else if (JONG_NASAL.has(af) && JONG_NASAL.has(bf)) cost += 0.25;
+    else if (af === 0 || bf === 0) cost += 0.35;
+    else cost += 0.45;
+  }
+  return Math.min(1, cost);
+}
+
+/* 음절 단위 편집 거리 (발음 유사도 반영) */
+function dist(a, b){
+  const n = a.length, m = b.length;
+  let prev = Array.from({length:m+1}, (_, j) => j);
+  for (let i = 1; i <= n; i++) {
+    const cur = [i];
+    for (let j = 1; j <= m; j++) {
+      cur[j] = Math.min(prev[j]+1, cur[j-1]+1, prev[j-1] + syllCost(a[i-1], b[j-1]));
+    }
+    prev = cur;
+  }
+  return prev[m];
+}
+
+/* 이름 길이에 따른 허용 오차 */
+function threshold(len){
+  if (len <= 2) return 0.5;
+  if (len === 3) return 1.0;
+  if (len <= 5) return 1.5;
+  return 2.0;
+}
+
+/* ================== 게임 상태 ================== */
+const $ = id => document.getElementById(id);
+const seasonBar = $('seasonBar'), board = $('board'), scoreNum = $('scoreNum');
+const transcriptEl = $('transcript'), toastEl = $('toast');
+const answerInput = $('answerInput'), micBtn = $('micBtn'), overlay = $('overlay');
+
+let game = null;   // {season, items:[{name,norm,revealed,el}], remaining}
+let finishing = false;
+
+const GUIDE_HTML = board.innerHTML;
+
+/* 시즌 버튼 생성 */
+SEASON_KEYS.forEach(key => {
+  const btn = document.createElement('button');
+  btn.className = 'season-btn';
+  btn.dataset.season = key;
+  btn.innerHTML = `${key === '쿵' ? '쿵' : '시즌 ' + key}<span class="badge">${SEASONS[key].length}</span>`;
+  btn.addEventListener('click', () => startGame(key));
+  seasonBar.appendChild(btn);
+});
+
+function shuffle(arr){
+  const a = arr.slice();
+  for (let i = a.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function setScore(n, animate=true){
+  scoreNum.textContent = n === null ? '--' : String(n);
+  if (animate) {
+    scoreNum.classList.remove('tick');
+    void scoreNum.offsetWidth;
+    scoreNum.classList.add('tick');
+  }
+}
+
+let micAutoTried = false;
+function startGame(season){
+  if (finishing) return;
+  document.querySelectorAll('.season-btn').forEach(b => b.classList.toggle('active', b.dataset.season === season));
+  const names = shuffle(SEASONS[season]);
+  board.innerHTML = '';
+  game = { season, remaining: names.length, items: [] };
+  names.forEach(name => {
+    const el = document.createElement('button');
+    el.className = 'card';
+    el.textContent = toChosung(name);
+    const item = { name, norm: norm(name), revealed: false, el };
+    el.addEventListener('click', () => reveal(item, 'click'));
+    game.items.push(item);
+    board.appendChild(el);
+  });
+  setScore(game.remaining);
+  answerInput.focus();
+  if (!micAutoTried && !micOn) { micAutoTried = true; startMic(); }
+}
+
+function reveal(item, how){
+  if (!game || item.revealed || finishing) return;
+  item.revealed = true;
+  item.el.textContent = item.name;
+  item.el.classList.add('revealed', how === 'voice' ? 'voice' : 'click');
+  game.remaining--;
+  setScore(game.remaining);
+  if (how !== 'click') showToast('✅ 정답! ' + item.name, 'ok');
+  if (game.remaining === 0) finishGame();
+}
+
+function finishGame(){
+  finishing = true;
+  setTimeout(() => {
+    overlay.classList.add('show');
+    setTimeout(() => {
+      overlay.classList.remove('show');
+      resetToInitial();
+      finishing = false;
+    }, 3000);
+  }, 600);
+}
+
+function resetToInitial(){
+  game = null;
+  document.querySelectorAll('.season-btn').forEach(b => b.classList.remove('active'));
+  board.innerHTML = GUIDE_HTML;
+  setScore(null, false);
+}
+$('resetBtn').addEventListener('click', () => { if (!finishing) resetToInitial(); });
+
+let toastTimer;
+function showToast(msg, type){
+  toastEl.textContent = msg;
+  toastEl.className = 'show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.className = '', 1800);
+}
+
+/* ================== 정답 판정 ================== */
+/* 단위 문자열(unit)에 가장 가까운 카봇 찾기. 허용 범위 밖이면 null */
+function findBest(unit){
+  let best = null;
+  for (const item of game.items) {
+    const d = dist(unit, item.norm);
+    if (d > threshold(item.norm.length) + 1e-9) continue;
+    if (!best || d < best.d - 1e-9 || (Math.abs(d - best.d) < 1e-9 && best.item.revealed && !item.revealed)) {
+      best = { item, d };
+    }
+  }
+  return best;
+}
+
+/* 텍스트에서 카봇 이름을 찾아 공개. 공개된 개수 반환 */
+function processText(text, how='voice'){
+  if (!game || finishing) return 0;
+  const tokens = text.split(/\s+/).filter(Boolean);
+  const n = tokens.length;
+  if (!n) return 0;
+  const used = Array(n).fill(false);
+  let count = 0;
+  for (let len = Math.min(n, 4); len >= 1; len--) {
+    for (let s = 0; s + len <= n; s++) {
+      if (used.slice(s, s+len).some(Boolean)) continue;
+      const unit = norm(tokens.slice(s, s+len).join(''));
+      if (!unit) continue;
+      const best = findBest(unit);
+      if (!best) continue;
+      for (let k = s; k < s+len; k++) used[k] = true;
+      if (!best.item.revealed) { reveal(best.item, how); count++; }
+    }
+  }
+  return count;
+}
+
+/* ================== 키보드 입력 ================== */
+function submitAnswer(){
+  const v = answerInput.value.trim();
+  if (!v) return;
+  if (!game) { showToast('먼저 시즌을 선택하세요', 'bad'); return; }
+  const c = processText(v, 'typed');
+  if (c === 0) showToast('❌ 일치하는 카봇이 없어요', 'bad');
+  answerInput.value = '';
+}
+$('submitBtn').addEventListener('click', submitAnswer);
+answerInput.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing) submitAnswer(); });
+
+/* ================== 음성 인식 ================== */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recog = null, micOn = false, interimTimer = null;
+
+function updateMicUI(){
+  micBtn.classList.toggle('on', micOn);
+  micBtn.querySelector('.txt').textContent = micOn ? '음성인식 ON' : '음성인식 OFF';
+}
+
+function startMic(){
+  if (!SR) {
+    transcriptEl.textContent = '이 브라우저는 음성 인식을 지원하지 않아요. Chrome 또는 Edge를 사용해주세요.';
+    return;
+  }
+  micOn = true;
+  updateMicUI();
+  transcriptEl.textContent = '듣고 있어요... 카봇 이름을 말해보세요!';
+
+  recog = new SR();
+  recog.lang = 'ko-KR';
+  recog.continuous = true;
+  recog.interimResults = true;
+  recog.maxAlternatives = 3;
+
+  recog.onresult = e => {
+    let interim = '', lastFinal = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const r = e.results[i];
+      if (r.isFinal) {
+        lastFinal = r[0].transcript;
+        for (let a = 0; a < r.length; a++) processText(r[a].transcript, 'voice');
+      } else {
+        interim += r[0].transcript;
+      }
+    }
+    transcriptEl.textContent = interim || lastFinal || transcriptEl.textContent;
+    clearTimeout(interimTimer);
+    if (interim) {
+      // 말이 잠깐 멈추면 중간 결과로도 판정 (긴 이름의 앞부분 오판 방지용 지연)
+      interimTimer = setTimeout(() => processText(interim, 'voice'), 600);
+    }
+  };
+  recog.onerror = e => {
+    if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+      micOn = false; updateMicUI();
+      transcriptEl.textContent = '마이크 권한이 필요해요. 주소창의 마이크 권한을 허용해주세요.';
+    }
+  };
+  recog.onend = () => {
+    if (micOn) setTimeout(() => { try { recog.start(); } catch (_) {} }, 250);
+  };
+  try { recog.start(); } catch (_) {}
+}
+
+function stopMic(){
+  micOn = false;
+  updateMicUI();
+  clearTimeout(interimTimer);
+  if (recog) { try { recog.stop(); } catch (_) {} }
+  transcriptEl.textContent = '(음성 인식이 꺼졌어요)';
+}
+
+micBtn.addEventListener('click', () => micOn ? stopMic() : startMic());
+
+
+							</script>
+                        </body>
+                        </html>
+                    
