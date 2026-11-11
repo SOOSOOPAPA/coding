@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>함수 설계 활동 ② — 지역 변수 · 전역 변수 · 함수 2개</title>
+<style>
+  :root{
+    --navy:#1F3A5F; --navy2:#16233F; --mint:#2563EB; --ice:#EAF2FF;
+    --bg:#F4F7FA; --card:#FFFFFF; --border:#DCE4EC; --muted:#5B6B80;
+    --text:#1A2233; --code-bg:#0E1729; --code-line:#E7ECF3;
+    --danger:#C0392B; --danger-bg:#FBEAEA;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:"Malgun Gothic","맑은 고딕",-apple-system,sans-serif; line-height:1.55; padding:28px 16px 70px;}
+  .wrap{max-width:880px; margin:0 auto;}
+  .hero{background:linear-gradient(135deg,var(--navy) 0%, var(--navy2) 100%); color:#fff; border-radius:16px;
+    padding:26px 32px; margin-bottom:18px; position:relative; overflow:hidden;}
+  .hero::after{content:""; position:absolute; right:-60px; top:-60px; width:200px; height:200px; border-radius:50%; background:rgba(255,255,255,0.06);}
+  .kicker{color:#7FB0FF; font-weight:700; font-size:13px; letter-spacing:1px; margin-bottom:6px;}
+  .hero h1{margin:0 0 6px; font-size:26px;}
+  .hero p{margin:0; color:#C9D6E8; font-size:13.5px;}
+  .concept-row{display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;}
+  .concept-chip{background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.25); color:#fff; font-size:12px; padding:4px 10px; border-radius:20px;}
+
+  .card{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px 26px; margin-bottom:16px;
+    box-shadow:0 1px 3px rgba(20,30,50,0.04);}
+  .card h2{font-size:16.5px; margin:0 0 12px; color:var(--navy); display:flex; align-items:center; gap:8px;
+    border-bottom:2px solid var(--navy); padding-bottom:9px; flex-wrap:wrap;}
+  .card h2 .num{color:var(--mint); font-weight:800;}
+  .card h3{font-size:14.5px; color:var(--navy); margin:16px 0 8px;}
+  .card p{font-size:14px; color:#333; margin:0 0 9px;}
+  .tags{display:flex; gap:6px; flex-wrap:wrap; margin:-2px 0 12px;}
+  .tag{background:var(--ice); color:var(--navy); font-size:12px; font-weight:700; padding:3px 9px; border-radius:20px;}
+  .tag.page{background:#EEF2F6; color:var(--muted); font-weight:600;}
+  .card h2 .pts{margin-left:auto; font-size:13.5px; color:var(--muted); font-weight:700;}
+  td.screen{text-align:left; font-family:"Consolas","D2Coding",monospace; line-height:1.75;}
+  td.screen .in{color:var(--text); font-weight:400;}
+  td.screen .out{color:var(--mint); font-weight:700;}
+  th .legend{font-weight:400; font-size:12px; opacity:.85;}
+  th .legend .in{color:#fff; font-weight:700;} th .legend .out{color:#9CC2FF; font-weight:700;}
+  .tag.star{background:#FFF3D6; color:#9A6200;}
+  .card.challenge{border:1.5px solid #F2C46D;}
+  .muted{color:var(--muted); font-size:13px;}
+  code,.mono{font-family:"Consolas","D2Coding",monospace;}
+  code{background:#EEF2F6; padding:1px 6px; border-radius:5px;}
+
+  .student-row{display:flex; gap:14px; flex-wrap:wrap;}
+  .field{flex:1; min-width:180px;}
+  .field label{display:block; font-size:13px; font-weight:700; color:var(--navy); margin-bottom:6px;}
+  .field input{width:100%; padding:9px 12px; border:1.5px solid var(--border); border-radius:8px; font-size:15px; font-family:inherit; background:#fff; transition:border .15s;}
+  .field input:focus{outline:none; border-color:var(--mint);}
+  .field.error input{border-color:var(--danger); background:var(--danger-bg);}
+  .err-msg{color:var(--danger); font-size:12px; margin-top:4px; display:none; font-weight:600;}
+  .field.error .err-msg{display:block;}
+
+  .rule-list{margin:0 0 4px; padding-left:18px; font-size:14px; color:#333;}
+  .rule-list li{margin-bottom:6px;}
+
+  table{width:100%; border-collapse:collapse; font-size:13.5px; margin:6px 0 4px;}
+  th,td{border:1px solid var(--border); padding:9px 11px; text-align:center; vertical-align:middle;}
+  th{background:var(--navy); color:#fff; font-weight:700;}
+  td.result{color:var(--mint); font-weight:700; text-align:left; font-family:"Consolas","D2Coding",monospace;}
+  td.left{text-align:left;}
+  td.mono{font-family:"Consolas","D2Coding",monospace;}
+  tr:nth-child(even) td{background:#FAFCFE;}
+  .table-scroll{overflow-x:auto;}
+
+  .hint-box{background:#EFF6FF; border:1px solid #BFDBFE; border-radius:10px; padding:14px 18px; margin-top:12px;}
+  .story{background:#FFF9EC; border:1px solid #F3DDA8; border-left:4px solid #E9A83A; border-radius:10px; padding:12px 16px; margin:0 0 12px; font-size:14px; color:#4A3B1C; line-height:1.7;}
+  .story .s-label{font-weight:800; font-size:12.5px; color:#9A6200; margin-bottom:4px;}
+  table.funcs td.mono{color:var(--navy); font-weight:700; white-space:nowrap;}
+  table.funcs th{background:#2F5A8C;}
+  .hint-box .h-title{color:var(--mint); font-weight:800; font-size:13px; margin-bottom:7px;}
+  .hint-box ul{margin:0; padding-left:18px; font-size:13px; color:#333;}
+  .hint-box li{margin-bottom:5px;}
+
+  .code-box{background:var(--code-bg); border-radius:10px; padding:14px; margin-top:6px; border:2px solid transparent;}
+  .code-box.error{border-color:var(--danger);}
+  .code-dots{display:flex; gap:6px; margin-bottom:10px; align-items:center;}
+  .dot{width:10px; height:10px; border-radius:50%;}
+  .dot.r{background:#FF5F56;} .dot.y{background:#FFBD2E;} .dot.g{background:#27C93F;}
+  .code-dots .fname{margin-left:8px; color:#6E85A8; font-size:12px; font-family:"Consolas","D2Coding",monospace;}
+  textarea.code{width:100%; min-height:200px; background:transparent; border:none; outline:none; color:var(--code-line);
+    font-family:"Consolas","D2Coding",monospace; font-size:14px; line-height:1.6; resize:vertical; white-space:pre; tab-size:4;}
+  textarea.code::placeholder{color:#6E85A8;}
+  .code-err{color:var(--danger); font-size:12px; margin-top:6px; display:none; font-weight:600;}
+  .code-err.show{display:block;}
+
+  .think{margin-top:14px;}
+  .think label{display:block; font-weight:700; font-size:13.5px; color:var(--navy); margin-bottom:6px;}
+  .think label span{color:var(--mint);}
+  .think textarea{width:100%; border:1.5px solid var(--border); border-radius:8px; padding:9px 12px; font-family:inherit; font-size:14px; resize:vertical; min-height:52px; background:#fff;}
+  .think textarea:focus{outline:none; border-color:var(--mint);}
+
+  .submit-bar{display:flex; align-items:center; justify-content:space-between; gap:16px; background:var(--card); border:1px solid var(--border);
+    border-radius:14px; padding:18px 24px; position:sticky; bottom:16px; box-shadow:0 4px 18px rgba(20,30,50,0.10);}
+  .submit-bar .info{font-size:12.5px; color:var(--muted);}
+  .btn-row{display:flex; gap:10px;}
+  button{font-family:inherit; font-size:14.5px; font-weight:700; border-radius:9px; border:none; padding:12px 22px; cursor:pointer; transition:transform .1s, opacity .15s; white-space:nowrap;}
+  button:active{transform:scale(0.98);}
+  button:disabled{opacity:.6; cursor:default;}
+  #submitBtn{background:var(--mint); color:#fff;}
+  #submitBtn:hover{opacity:0.92;}
+  #resetBtn{background:#EEF2F6; color:var(--navy);}
+  #resetBtn:hover{opacity:0.85;}
+  .reset-confirm{display:none; align-items:center; gap:8px; font-size:13px; color:var(--danger); font-weight:700;}
+  .reset-confirm.show{display:flex;}
+  .reset-confirm button{padding:8px 14px; font-size:13px;}
+  #resetYes{background:var(--danger); color:#fff;}
+  #resetNo{background:#EEF2F6; color:var(--navy);}
+
+  .toast{position:fixed; left:50%; top:26px; transform:translateX(-50%) translateY(-140%); background:var(--navy2); color:#fff;
+    padding:14px 22px; border-radius:10px; font-size:14px; box-shadow:0 8px 24px rgba(0,0,0,0.25); z-index:50;
+    transition:transform .3s ease; display:flex; align-items:center; gap:10px; max-width:calc(100% - 32px);}
+  .toast.show{transform:translateX(-50%) translateY(0);}
+  .toast.err{background:var(--danger);}
+  .badge-ok{width:20px; height:20px; border-radius:50%; background:var(--mint); flex:none; display:flex; align-items:center; justify-content:center; font-size:12px;}
+
+  @media (max-width:600px){
+    .hero{padding:22px;} .card{padding:16px;}
+    .submit-bar{flex-direction:column; align-items:stretch;}
+    .btn-row{justify-content:stretch;} .btn-row button{flex:1;}
+  }
+  @page{ size:A4; margin:10mm; }
+  @media print{
+    body{padding:0; background:#fff; font-size:11px; line-height:1.32;}
+    .wrap{max-width:100%;}
+    .hero{padding:14px 18px; margin-bottom:8px; border-radius:10px;} .hero::after{display:none;}
+    .hero h1{font-size:19px; margin-bottom:3px;} .hero p{font-size:11.5px;}
+    .card{box-shadow:none; padding:9px 15px; margin-bottom:6px; border-radius:8px; break-inside:avoid;}
+    .card h2{font-size:12.5px; padding-bottom:4px; margin-bottom:6px;}
+    .card p,.rule-list{font-size:11px;}
+    table{font-size:10.5px;} th,td{padding:4px 6px;}
+    .hint-box{padding:7px 11px;} .hint-box ul{font-size:10.5px;}
+    textarea.code{min-height:110px; font-size:11px;}
+    .submit-bar{position:static; box-shadow:none;} .toast{display:none !important;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="hero">
+<div class="kicker">Ⅱ. 프로그래밍의 기초 · 4. 함수 — 함수 설계 활동 ②</div>
+<h1>🧩 함수 설계 활동 ② — 지역 변수 · 전역 변수 · 함수 2개</h1>
+<p>함수 안에서 만든 지역 변수와 함수 밖의 전역 변수를 사용해 보고, 마지막 문제 6에서는 계산하는 함수와 출력하는 함수 <b>2개</b>를 연결해 보자.</p>
+<div class="concept-row"><span class="concept-chip">지역 변수</span><span class="concept-chip">전역 변수</span><span class="concept-chip">global</span><span class="concept-chip">매개 변수 없는 함수</span><span class="concept-chip">몫 연산 //</span><span class="concept-chip">함수 2개</span><span class="concept-chip">매개 변수 2개</span><span class="concept-chip">map·split</span></div>
+</div>
+</div>
+<style>
+  .ex-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,390px),1fr)); gap:12px; margin-top:4px;}
+  .ex-grid > div{min-width:0;}
+  .ex-label{font-size:13px; font-weight:800; color:var(--navy); margin-bottom:6px;}
+  pre.ex{background:var(--code-bg); color:var(--code-line); border-radius:10px; padding:12px 14px; margin:0;
+    font-family:"Consolas","D2Coding",monospace; font-size:13px; line-height:1.65; overflow-x:auto; white-space:pre;}
+  pre.ex .cm{color:#7FA6D6;}
+  .concept .rule-list{margin-top:12px;}
+  .concept h2 .num{font-size:15px;}
+</style><div class="card concept">
+<h2><span class="num">💡</span> 핵심 개념 — 지역 변수 · 전역 변수 · 함수 2개 연결</h2>
+<div class="ex-grid"><div><div class="ex-label">지역 변수 — 함수 안에서 만든 변수</div><pre class="ex">def calc(a):
+    s = a * 2      <span class="cm"># s는 지역 변수</span>
+    return s
+
+print(calc(5))     <span class="cm"># 10</span>
+print(s)           <span class="cm"># 오류! 함수 밖에서는 s가 없음</span></pre></div><div><div class="ex-label">전역 변수 — 함수 밖에서 만든 변수</div><pre class="ex">cnt = 0          <span class="cm"># 전역 변수</span>
+
+def add():
+    global cnt   <span class="cm"># 값을 '바꿀' 때는 global 필요</span>
+    cnt = cnt + 1
+
+def show():
+    return cnt   <span class="cm"># '읽기만' 할 때는 필요 없음</span>
+
+add()
+add()
+print(show())    <span class="cm"># 2</span></pre></div><div><div class="ex-label">함수 2개 연결 · 한 줄에 두 값 입력</div><pre class="ex">def area(w, h):        <span class="cm"># 매개 변수 2개</span>
+    return w * h
+
+def show(a):           <span class="cm"># 결과를 받아 출력</span>
+    print(str(a) + "칸")
+
+w, h = map(int, input().split())
+show(area(w, h))       <span class="cm"># 안쪽 area()가 먼저 실행</span>
+<span class="cm"># 입력 3 4  →  출력 12칸</span></pre></div></div>
+<ul class="rule-list"><li><b>지역 변수</b>는 그 함수가 실행되는 동안에만 있고, 함수 밖에서는 쓸 수 없습니다. 매개 변수도 지역 변수입니다.</li><li>함수 안에서 전역 변수의 값을 <b>바꾸려면</b> <code>global 변수이름</code>을 먼저 써야 합니다. 없으면 <code>UnboundLocalError</code>가 납니다. <b>읽기만</b> 할 때는 필요 없습니다.</li><li><code>//</code>는 나눗셈의 몫을 구하는 연산자입니다. (<code>7 // 2</code> → <code>3</code>)</li><li><code>show(area(w, h))</code>처럼 쓰면 안쪽 함수의 <b>반환값</b>이 바깥 함수의 <b>매개 변수</b>로 들어갑니다.</li><li><code>map(int, input().split())</code>은 <code>3 4</code>처럼 공백으로 구분한 두 값을 정수로 바꿔 한 번에 입력받고, <code>str(12) + "칸"</code>처럼 숫자와 글자를 붙여 쓸 수 있습니다.</li></ul>
+</div>
+<div class="card" id="card0">
+<h2><span class="num">문제 4</span> 3의 배수 개수 세기 함수</h2>
+<div class="tags"><span class="tag">지역 변수</span><span class="tag">for 반복문</span><span class="tag">if 조건문</span><span class="tag">반환값</span><span class="tag page">교과서 140~142쪽</span></div>
+
+<p>정수 <code>n</code>을 전달받아, 1부터 <code>n</code>까지의 수 중 <b>3의 배수가 몇 개인지</b> 세어 <b>반환</b>하는 함수 <code>count3()</code>을 설계해 보자.</p>
+
+<h3>조건</h3>
+<ul class="rule-list"><li>함수 이름은 <code>count3</code>, 매개 변수는 1개로 합니다.</li><li>개수를 세는 변수는 함수 <b>안에서</b> 만들어 사용합니다. (지역 변수)</li><li>키보드로 정수 한 개를 입력받아 함수에 전달하고, 반환된 개수를 출력합니다.</li></ul>
+<h3>입출력 예시</h3>
+<div class="table-scroll"><table>
+<tr><th style="width:52px">번호</th><th>입력</th><th>출력</th><th>설명</th></tr>
+<tr><td>1</td><td class="mono">10</td><td class="result">3</td><td class="left">3, 6, 9</td></tr><tr><td>2</td><td class="mono">20</td><td class="result">6</td><td class="left">3, 6, 9, 12, 15, 18</td></tr><tr><td>3</td><td class="mono">2</td><td class="result">0</td><td class="left">3의 배수가 없음</td></tr>
+</table></div>
+<div class="hint-box"><div class="h-title">💡 힌트</div><ul><li>1부터 n까지 반복하려면 <code>range(1, n+1)</code>을 사용합니다. (n까지 포함하려면 n+1)</li><li>3의 배수인지는 <code>i % 3 == 0</code>으로 확인합니다.</li><li>개수를 세는 변수는 반복문 <b>전에</b> <code>0</code>으로 정해 두고, 조건이 맞을 때마다 1씩 더합니다.</li><li><code>return</code>은 반복문이 <b>모두 끝난 뒤</b>에 실행되도록 들여쓰기 위치에 주의합니다.</li></ul></div>
+
+</div>
+<div class="card" id="card1">
+<h2><span class="num">문제 5</span> 용돈 저금통</h2>
+<div class="tags"><span class="tag">함수 2개</span><span class="tag">전역 변수</span><span class="tag">global</span><span class="tag">매개 변수 없는 함수</span><span class="tag">몫 연산 //</span><span class="tag page">교과서 142~144쪽</span></div>
+
+<p>용돈을 받을 때마다 <b>절반</b>을 저금하려고 한다. 저금한 금액을 <b>전역 변수</b> <code>total</code>에 모으는 함수와, 목표 금액(3000원)을 달성했는지 알려 주는 함수를 만들어 보자.</p>
+<h3>함수 설계도</h3><div class="table-scroll"><table class="funcs"><tr><th>함수</th><th>하는 일</th><th>매개 변수</th><th>반환값</th></tr><tr><td class="mono">save(money)</td><td class="left">받은 용돈의 절반(<code>money // 2</code>)을 전역 변수 <code>total</code>에 더함</td><td class="left">받은 용돈</td><td class="left">없음</td></tr><tr><td class="mono">check()</td><td class="left"><code>total</code>이 3000 이상이면 <code>목표 달성!</code><br>그 외 <code>조금 더 모으자</code></td><td class="left">없음</td><td class="left">결과 문장</td></tr></table></div>
+<h3>조건</h3>
+<ul class="rule-list"><li>프로그램 맨 위에 전역 변수 <code>total = 0</code>을 만듭니다.</li><li><code>save()</code>는 출력도 반환도 하지 않고, 전역 변수 <code>total</code>의 값을 바꿉니다.</li><li><code>check()</code>는 매개 변수 <b>없이</b> 결과 문장을 <code>return</code>합니다.</li><li>용돈을 한 줄에 하나씩 <b>3번</b> 입력받은 뒤, 저금한 금액과 결과를 출력합니다.</li></ul>
+<h3>입출력 예시</h3>
+<div class="table-scroll"><table>
+<tr><th style="width:52px">번호</th><th>입력</th><th>출력</th><th>설명</th></tr>
+<tr><td>1</td><td class="mono">2000<br>3000<br>1000</td><td class="result">저금한 금액: 3000<br>결과: 목표 달성!</td><td class="left">1000+1500+500 = 3000</td></tr><tr><td>2</td><td class="mono">1000<br>2000<br>500</td><td class="result">저금한 금액: 1750<br>결과: 조금 더 모으자</td><td class="left">500+1000+250 = 1750</td></tr><tr><td>3</td><td class="mono">4000<br>0<br>2001</td><td class="result">저금한 금액: 3000<br>결과: 목표 달성!</td><td class="left">2001 // 2 = 1000 (몫만 남음)</td></tr>
+</table></div>
+<div class="hint-box"><div class="h-title">💡 힌트</div><ul><li>함수 안에서 전역 변수의 값을 <b>바꾸려면</b> 함수 첫 줄에 <code>global total</code>을 씁니다.</li><li><code>//</code>는 나눗셈의 <b>몫</b>만 구합니다. (<code>2001 // 2</code> → <code>1000</code>) <code>/</code>를 쓰면 <code>1000.5</code>처럼 소수가 나옵니다.</li><li>매개 변수가 없는 함수는 <code>def check():</code>처럼 괄호를 비워 두고, 호출할 때도 <code>check()</code>라고 씁니다.</li><li><code>check()</code>는 <code>total</code>을 <b>읽기만</b> 하므로 <code>global</code>을 쓰지 않아도 됩니다.</li></ul></div>
+</div>
+<div class="card" id="card2">
+<h2><span class="num">문제 6</span> 게임 시간 체크</h2>
+<div class="tags"><span class="tag">함수 2개</span><span class="tag">매개 변수 2개</span><span class="tag">return과 출력</span><span class="tag">지역 변수</span><span class="tag">한 줄에 두 값 입력</span><span class="tag page">교과서 131쪽 · 135~144쪽</span></div>
+<div class="story"><div class="s-label">📖 이야기</div>준호는 엄마와 <b>하루 게임 시간</b>을 지키기로 약속했다. 3일 동안 게임한 시간을 <b>시간과 분</b>으로 입력하면, 분으로 바꾸어 약속을 잘 지켰는지 알려 주는 프로그램을 만들어 주자. (<b>60분 이하 적당해요, 120분 이하 조금 많아요, 그 외 너무 많아요</b>)</div>
+<p>시간과 분을 전체 분으로 바꾸어 <b>반환</b>하는 함수와, 분을 받아 결과를 <b>출력</b>하는 함수, <b>두 개의 함수</b>를 만들어 보자.</p>
+<h3>함수 설계도</h3><div class="table-scroll"><table class="funcs"><tr><th>함수</th><th>하는 일</th><th>매개 변수</th><th>반환값</th></tr><tr><td class="mono">to_min(h, m)</td><td class="left">시간과 분을 전체 분으로 바꿈</td><td class="left">시간, 분</td><td class="left">전체 분</td></tr><tr><td class="mono">judge(t)</td><td class="left">결과를 지역 변수 <code>msg</code>에 저장한 뒤 출력</td><td class="left">분</td><td class="left">없음 (함수 안에서 출력)</td></tr></table></div>
+<h3>조건</h3>
+<ul class="rule-list"><li><code>to_min()</code>은 매개 변수 <b>2개</b>를 받아 전체 분을 <code>return</code>합니다.</li><li><code>judge()</code>는 결과를 함수 안의 지역 변수 <code>msg</code>에 저장한 뒤, <code>90분 -> 조금 많아요</code> 형식으로 <b>함수 안에서</b> 출력합니다.</li><li><code>to_min()</code>의 반환값을 <code>judge()</code>에 전달합니다.</li><li>게임 시간은 <code>1 30</code>처럼 시간과 분을 공백으로 구분해 한 줄에 입력합니다.</li><li><b>하루치를 입력할 때마다 바로 한 줄씩</b> 결과를 출력하며, 이것을 <b>3일</b>분 반복합니다.</li></ul>
+<h3>입출력 예시</h3>
+<div class="table-scroll"><table>
+<tr><th style="width:52px">번호</th><th>실행 화면 <span class="legend">(<span class="in">검은 글씨</span>: 입력 · <span class="out">파란 글씨</span>: 출력)</span></th><th>설명</th></tr>
+<tr><td>1</td><td class="screen"><span class="in">0 50</span><br><span class="out">50분 -> 적당해요</span><br><span class="in">1 30</span><br><span class="out">90분 -> 조금 많아요</span><br><span class="in">2 10</span><br><span class="out">130분 -> 너무 많아요</span></td><td class="left">1시간 30분 = 1×60+30 = 90분</td></tr><tr><td>2</td><td class="screen"><span class="in">1 0</span><br><span class="out">60분 -> 적당해요</span><br><span class="in">2 0</span><br><span class="out">120분 -> 조금 많아요</span><br><span class="in">0 5</span><br><span class="out">5분 -> 적당해요</span></td><td class="left">60분은 적당해요, 120분은 조금 많아요<br>(기준값 확인)</td></tr>
+</table></div>
+<div class="hint-box"><div class="h-title">💡 힌트</div><ul><li>한 줄에 두 값을 입력받으려면 <code>h, m = map(int, input().split())</code>을 사용합니다.</li><li><code>to_min(h, m)</code>처럼 매개 변수가 2개이면, 호출할 때도 값을 순서대로 2개 넣습니다.</li><li><code>judge()</code> 안에서 <code>if - elif - else</code>로 <code>msg</code>에 문장을 저장하고, 마지막에 한 번만 출력합니다.</li><li><code>judge(to_min(h, m))</code>처럼 쓰면 안쪽 <code>to_min()</code>이 먼저 실행되고, 그 결과가 <code>judge()</code>로 전달됩니다.</li><li><code>str(t) + "분 ->"</code>처럼 쓰면 숫자와 글자를 붙여 <code>90분 -></code>으로 출력할 수 있습니다.</li></ul></div>
+
+</div>
+</div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const ACTIVITY_TITLE = "함수 설계 활동 ② — 지역 변수 · 전역 변수 · 함수 2개";
+const ACTIVITY_KICKER = "Ⅱ. 프로그래밍의 기초 · 4. 함수 — 함수 설계 활동 ②";
+const PROBLEMS = [{"no": 4, "title": "3의 배수 개수 세기 함수", "think": ""}, {"no": 5, "title": "용돈 저금통", "think": ""}, {"no": 6, "title": "게임 시간 체크", "think": ""}];
+
+const GFORM_ACTION = 'https://docs.google.com/forms/d/e/1FAIpQLSfAhvtWQThBjiKmLkMTAEifzfKHvctgI-0IdKvJtp0xKvWuNg/formResponse';
+const GFORM_ENTRY = { studentId: 'entry.1718857135', name: 'entry.965838553', code: 'entry.885478980' };
+const $ = id => document.getElementById(id);
+
+function showToast(msg, isErr){
+  const t = $('toast');
+  t.innerHTML = (isErr ? '' : '<span class="badge-ok">✓</span>') + '<span>' + msg + '</span>';
+  t.className = 'toast show' + (isErr ? ' err' : '');
+  clearTimeout(t._timer); t._timer = setTimeout(() => t.classList.remove('show'), 3600);
+}
+function clearErrors(){
+  $('fStudentId').classList.remove('error'); $('fStudentName').classList.remove('error');
+  PROBLEMS.forEach((_, i) => { $('box'+i).classList.remove('error'); $('err'+i).classList.remove('show'); });
+}
+
+// 코드 칸에서 Tab 키 → 공백 4칸
+document.querySelectorAll('textarea.code').forEach(ta => {
+  ta.addEventListener('keydown', e => {
+    if(e.key === 'Tab' && !e.shiftKey){
+      e.preventDefault();
+      const s = ta.selectionStart, en = ta.selectionEnd;
+      ta.value = ta.value.slice(0, s) + '    ' + ta.value.slice(en);
+      ta.selectionStart = ta.selectionEnd = s + 4;
+    }
+  });
+  ta.addEventListener('input', () => { const i = ta.id.slice(4); $('box'+i).classList.remove('error'); $('err'+i).classList.remove('show'); });
+});
+
+$('resetBtn').addEventListener('click', () => { $('resetConfirm').classList.add('show'); $('resetBtn').style.display = 'none'; });
+$('resetNo').addEventListener('click', () => { $('resetConfirm').classList.remove('show'); $('resetBtn').style.display = ''; });
+$('resetYes').addEventListener('click', () => {
+  $('studentId').value = ''; $('studentName').value = '';
+  PROBLEMS.forEach((_, i) => { $('code'+i).value = ''; if($('think'+i)) $('think'+i).value = ''; });
+  clearErrors();
+  $('resetConfirm').classList.remove('show'); $('resetBtn').style.display = '';
+  showToast('초기화되었습니다.');
+});
+
+$('submitBtn').addEventListener('click', async function(){
+  clearErrors();
+  const id = $('studentId').value.trim(), name = $('studentName').value.trim();
+  let hasError = false, firstBad = null;
+  if(!id){ $('fStudentId').classList.add('error'); hasError = true; firstBad = firstBad || $('studentId'); }
+  if(!name){ $('fStudentName').classList.add('error'); hasError = true; firstBad = firstBad || $('studentName'); }
+  const missing = [];
+  PROBLEMS.forEach((p, i) => {
+    if(!$('code'+i).value.trim()){
+      $('box'+i).classList.add('error'); $('err'+i).classList.add('show');
+      missing.push('문제 ' + p.no); hasError = true; firstBad = firstBad || $('code'+i);
+    }
+  });
+  if(hasError){
+    showToast(!id || !name ? '학번과 이름을 입력해 주세요.' : missing.join(', ') + '의 코드를 작성해 주세요.', true);
+    if(firstBad) firstBad.focus();
+    return;
+  }
+
+  const btn = $('submitBtn'); btn.disabled = true; btn.textContent = '제출 중...';
+  const now = new Date();
+  const ts = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0') + ' ' +
+    String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+  const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+  const cards = PROBLEMS.map((p, i) => {
+    const code = $('code'+i).value, thEl = $('think'+i), th = thEl ? thEl.value.trim() : '';
+    const thHtml = thEl ? `<div class="d-label">생각해 보기 — ${p.think}</div>
+<div class="d-value">${th ? esc(th).replace(/\n/g,'<br>') : '<span class="empty">(작성 없음)</span>'}</div>` : '';
+    return `<div class="card"><h2>문제 ${p.no}. ${esc(p.title)}</h2>
+<div class="code-box"><pre>${esc(code)}</pre></div>${thHtml}</div>`;
+  }).join('');
+
+  const submissionHtml = `<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8">
+<title>${ACTIVITY_TITLE} — ${esc(id)} ${esc(name)} 제출 문서</title>
+<style>
+  body{margin:0; background:#F4F7FA; color:#1A2233; font-family:"Malgun Gothic","맑은 고딕",sans-serif; padding:32px 16px 60px;}
+  .wrap{max-width:760px; margin:0 auto;}
+  .hero{background:linear-gradient(135deg,#1F3A5F 0%, #16233F 100%); color:#fff; border-radius:14px; padding:28px 32px; margin-bottom:20px;}
+  .hero .kicker{color:#7FB0FF; font-weight:700; font-size:13px; margin-bottom:8px;}
+  .hero h1{margin:0 0 10px; font-size:24px;}
+  .meta-row{display:flex; gap:24px; flex-wrap:wrap; font-size:14px; color:#C9D6E8;}
+  .meta-row b{color:#fff;}
+  .card{background:#fff; border:1px solid #DCE4EC; border-radius:12px; padding:22px 26px; margin-bottom:16px;}
+  .card h2{font-size:15px; margin:0 0 12px; color:#1F3A5F; border-bottom:2px solid #1F3A5F; padding-bottom:8px;}
+  .d-label{font-weight:700; font-size:13px; color:#1F3A5F; margin:14px 0 4px;}
+  .d-value{font-size:14px; color:#333; line-height:1.6;}
+  .d-value .empty{color:#9AA7B8; font-style:italic;}
+  .code-box{background:#0E1729; border-radius:10px; padding:16px 18px; overflow-x:auto;}
+  .code-box pre{margin:0; color:#E7ECF3; font-family:"Consolas","D2Coding",monospace; font-size:13.5px; line-height:1.6; white-space:pre-wrap;}
+  .stamp{text-align:center; font-size:12px; color:#9AA7B8; margin-top:20px;}
+</style></head>
+<body><div class="wrap">
+  <div class="hero"><div class="kicker">${ACTIVITY_KICKER} — 제출 문서</div><h1>${ACTIVITY_TITLE}</h1>
+    <div class="meta-row"><div>학번 <b>${esc(id)}</b></div><div>이름 <b>${esc(name)}</b></div><div>제출 시각 <b>${esc(ts)}</b></div></div></div>
+  ${cards}
+  <div class="stamp">이 문서는 활동지 제출 시 자동으로 생성되었습니다.</div>
+</div></body></html>`;
+
+  const formText = `[활동] ${ACTIVITY_TITLE}\n\n` + PROBLEMS.map((p, i) =>
+`[문제 ${p.no}] ${p.title}
+${$('code'+i).value.trim()}` + ($('think'+i) ? `
+
+- 생각해 보기: ${$('think'+i).value.trim() || '(작성 없음)'}` : '')).join('\n\n');
+
+  const fd = new URLSearchParams();
+  fd.append(GFORM_ENTRY.studentId, id);
+  fd.append(GFORM_ENTRY.name, name);
+  fd.append(GFORM_ENTRY.code, formText);
+  try { await fetch(GFORM_ACTION, { method:'POST', mode:'no-cors', body:fd }); } catch(err) {}
+
+  const blob = new Blob([submissionHtml], { type:'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = `${id}_${name}.html`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+
+  btn.disabled = false; btn.textContent = '제출하기';
+  showToast('개인 보관용 HTML 파일을 저장했습니다. 온라인 접수 여부는 선생님의 응답 시트에서 확인해 주세요.');
+});
+
+</script>
+</body>
+</html>
