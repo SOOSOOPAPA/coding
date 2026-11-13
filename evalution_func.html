@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>함수 수행평가</title>
+<style>
+  :root{
+    --navy:#1F3A5F; --navy2:#16233F; --mint:#2563EB; --ice:#EAF2FF;
+    --bg:#F4F7FA; --card:#FFFFFF; --border:#DCE4EC; --muted:#5B6B80;
+    --text:#1A2233; --code-bg:#0E1729; --code-line:#E7ECF3;
+    --danger:#C0392B; --danger-bg:#FBEAEA;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:"Malgun Gothic","맑은 고딕",-apple-system,sans-serif; line-height:1.55; padding:28px 16px 70px;}
+  .wrap{max-width:880px; margin:0 auto;}
+  .hero{background:linear-gradient(135deg,var(--navy) 0%, var(--navy2) 100%); color:#fff; border-radius:16px;
+    padding:26px 32px; margin-bottom:18px; position:relative; overflow:hidden;}
+  .hero::after{content:""; position:absolute; right:-60px; top:-60px; width:200px; height:200px; border-radius:50%; background:rgba(255,255,255,0.06);}
+  .kicker{color:#7FB0FF; font-weight:700; font-size:13px; letter-spacing:1px; margin-bottom:6px;}
+  .hero h1{margin:0 0 6px; font-size:26px;}
+  .hero p{margin:0; color:#C9D6E8; font-size:13.5px;}
+  .concept-row{display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;}
+  .concept-chip{background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.25); color:#fff; font-size:12px; padding:4px 10px; border-radius:20px;}
+
+  .card{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px 26px; margin-bottom:16px;
+    box-shadow:0 1px 3px rgba(20,30,50,0.04);}
+  .card h2{font-size:16.5px; margin:0 0 12px; color:var(--navy); display:flex; align-items:center; gap:8px;
+    border-bottom:2px solid var(--navy); padding-bottom:9px; flex-wrap:wrap;}
+  .card h2 .num{color:var(--mint); font-weight:800;}
+  .card h3{font-size:14.5px; color:var(--navy); margin:16px 0 8px;}
+  .card p{font-size:14px; color:#333; margin:0 0 9px;}
+  .tags{display:flex; gap:6px; flex-wrap:wrap; margin:-2px 0 12px;}
+  .tag{background:var(--ice); color:var(--navy); font-size:12px; font-weight:700; padding:3px 9px; border-radius:20px;}
+  .tag.page{background:#EEF2F6; color:var(--muted); font-weight:600;}
+  .card h2 .pts{margin-left:auto; font-size:13.5px; color:var(--muted); font-weight:700;}
+  td.screen{text-align:left; font-family:"Consolas","D2Coding",monospace; line-height:1.75;}
+  td.screen .in{color:var(--text); font-weight:400;}
+  td.screen .out{color:var(--mint); font-weight:700;}
+  th .legend{font-weight:400; font-size:12px; opacity:.85;}
+  th .legend .in{color:#fff; font-weight:700;} th .legend .out{color:#9CC2FF; font-weight:700;}
+  .tag.star{background:#FFF3D6; color:#9A6200;}
+  .card.challenge{border:1.5px solid #F2C46D;}
+  .muted{color:var(--muted); font-size:13px;}
+  code,.mono{font-family:"Consolas","D2Coding",monospace;}
+  code{background:#EEF2F6; padding:1px 6px; border-radius:5px;}
+
+  .student-row{display:flex; gap:14px; flex-wrap:wrap;}
+  .field{flex:1; min-width:180px;}
+  .field label{display:block; font-size:13px; font-weight:700; color:var(--navy); margin-bottom:6px;}
+  .field input{width:100%; padding:9px 12px; border:1.5px solid var(--border); border-radius:8px; font-size:15px; font-family:inherit; background:#fff; transition:border .15s;}
+  .field input:focus{outline:none; border-color:var(--mint);}
+  .field.error input{border-color:var(--danger); background:var(--danger-bg);}
+  .err-msg{color:var(--danger); font-size:12px; margin-top:4px; display:none; font-weight:600;}
+  .field.error .err-msg{display:block;}
+
+  .rule-list{margin:0 0 4px; padding-left:18px; font-size:14px; color:#333;}
+  .rule-list li{margin-bottom:6px;}
+
+  table{width:100%; border-collapse:collapse; font-size:13.5px; margin:6px 0 4px;}
+  th,td{border:1px solid var(--border); padding:9px 11px; text-align:center; vertical-align:middle;}
+  th{background:var(--navy); color:#fff; font-weight:700;}
+  td.result{color:var(--mint); font-weight:700; text-align:left; font-family:"Consolas","D2Coding",monospace;}
+  td.left{text-align:left;}
+  td.mono{font-family:"Consolas","D2Coding",monospace;}
+  tr:nth-child(even) td{background:#FAFCFE;}
+  .table-scroll{overflow-x:auto;}
+
+  .hint-box{background:#EFF6FF; border:1px solid #BFDBFE; border-radius:10px; padding:14px 18px; margin-top:12px;}
+  .story{background:#FFF9EC; border:1px solid #F3DDA8; border-left:4px solid #E9A83A; border-radius:10px; padding:12px 16px; margin:0 0 12px; font-size:14px; color:#4A3B1C; line-height:1.7;}
+  .story .s-label{font-weight:800; font-size:12.5px; color:#9A6200; margin-bottom:4px;}
+  table.funcs td.mono{color:var(--navy); font-weight:700; white-space:nowrap;}
+  table.funcs th{background:#2F5A8C;}
+  .hint-box .h-title{color:var(--mint); font-weight:800; font-size:13px; margin-bottom:7px;}
+  .hint-box ul{margin:0; padding-left:18px; font-size:13px; color:#333;}
+  .hint-box li{margin-bottom:5px;}
+
+  .code-box{background:var(--code-bg); border-radius:10px; padding:14px; margin-top:6px; border:2px solid transparent;}
+  .code-box.error{border-color:var(--danger);}
+  .code-dots{display:flex; gap:6px; margin-bottom:10px; align-items:center;}
+  .dot{width:10px; height:10px; border-radius:50%;}
+  .dot.r{background:#FF5F56;} .dot.y{background:#FFBD2E;} .dot.g{background:#27C93F;}
+  .code-dots .fname{margin-left:8px; color:#6E85A8; font-size:12px; font-family:"Consolas","D2Coding",monospace;}
+  textarea.code{width:100%; min-height:200px; background:transparent; border:none; outline:none; color:var(--code-line);
+    font-family:"Consolas","D2Coding",monospace; font-size:14px; line-height:1.6; resize:vertical; white-space:pre; tab-size:4;}
+  textarea.code::placeholder{color:#6E85A8;}
+  .code-err{color:var(--danger); font-size:12px; margin-top:6px; display:none; font-weight:600;}
+  .code-err.show{display:block;}
+
+  .think{margin-top:14px;}
+  .think label{display:block; font-weight:700; font-size:13.5px; color:var(--navy); margin-bottom:6px;}
+  .think label span{color:var(--mint);}
+  .think textarea{width:100%; border:1.5px solid var(--border); border-radius:8px; padding:9px 12px; font-family:inherit; font-size:14px; resize:vertical; min-height:52px; background:#fff;}
+  .think textarea:focus{outline:none; border-color:var(--mint);}
+
+  .submit-bar{display:flex; align-items:center; justify-content:space-between; gap:16px; background:var(--card); border:1px solid var(--border);
+    border-radius:14px; padding:18px 24px; position:sticky; bottom:16px; box-shadow:0 4px 18px rgba(20,30,50,0.10);}
+  .submit-bar .info{font-size:12.5px; color:var(--muted);}
+  .btn-row{display:flex; gap:10px;}
+  button{font-family:inherit; font-size:14.5px; font-weight:700; border-radius:9px; border:none; padding:12px 22px; cursor:pointer; transition:transform .1s, opacity .15s; white-space:nowrap;}
+  button:active{transform:scale(0.98);}
+  button:disabled{opacity:.6; cursor:default;}
+  #submitBtn{background:var(--mint); color:#fff;}
+  #submitBtn:hover{opacity:0.92;}
+  #resetBtn{background:#EEF2F6; color:var(--navy);}
+  #resetBtn:hover{opacity:0.85;}
+  .reset-confirm{display:none; align-items:center; gap:8px; font-size:13px; color:var(--danger); font-weight:700;}
+  .reset-confirm.show{display:flex;}
+  .reset-confirm button{padding:8px 14px; font-size:13px;}
+  #resetYes{background:var(--danger); color:#fff;}
+  #resetNo{background:#EEF2F6; color:var(--navy);}
+
+  .toast{position:fixed; left:50%; top:26px; transform:translateX(-50%) translateY(-140%); background:var(--navy2); color:#fff;
+    padding:14px 22px; border-radius:10px; font-size:14px; box-shadow:0 8px 24px rgba(0,0,0,0.25); z-index:50;
+    transition:transform .3s ease; display:flex; align-items:center; gap:10px; max-width:calc(100% - 32px);}
+  .toast.show{transform:translateX(-50%) translateY(0);}
+  .toast.err{background:var(--danger);}
+  .badge-ok{width:20px; height:20px; border-radius:50%; background:var(--mint); flex:none; display:flex; align-items:center; justify-content:center; font-size:12px;}
+
+  @media (max-width:600px){
+    .hero{padding:22px;} .card{padding:16px;}
+    .submit-bar{flex-direction:column; align-items:stretch;}
+    .btn-row{justify-content:stretch;} .btn-row button{flex:1;}
+  }
+  @page{ size:A4; margin:10mm; }
+  @media print{
+    body{padding:0; background:#fff; font-size:11px; line-height:1.32;}
+    .wrap{max-width:100%;}
+    .hero{padding:14px 18px; margin-bottom:8px; border-radius:10px;} .hero::after{display:none;}
+    .hero h1{font-size:19px; margin-bottom:3px;} .hero p{font-size:11.5px;}
+    .card{box-shadow:none; padding:9px 15px; margin-bottom:6px; border-radius:8px; break-inside:avoid;}
+    .card h2{font-size:12.5px; padding-bottom:4px; margin-bottom:6px;}
+    .card p,.rule-list{font-size:11px;}
+    table{font-size:10.5px;} th,td{padding:4px 6px;}
+    .hint-box{padding:7px 11px;} .hint-box ul{font-size:10.5px;}
+    textarea.code{min-height:110px; font-size:11px;}
+    .submit-bar{position:static; box-shadow:none;} .toast{display:none !important;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="hero">
+<div class="kicker">Ⅱ. 프로그래밍의 기초 · 4. 함수 — 수행평가</div>
+<h1>📝 함수 수행평가</h1>
+<p>문제의 조건에 맞게 함수를 정의하고 호출하는 프로그램을 작성하시오. 함수의 결과를 반환할지, 함수 안에서 출력할지 조건을 꼭 확인하세요.</p>
+<div class="concept-row"><span class="concept-chip">def 함수 정의</span><span class="concept-chip">매개 변수 0·1·2개</span><span class="concept-chip">return 반환값</span><span class="concept-chip">함수 안에서 출력</span><span class="concept-chip">지역 변수</span><span class="concept-chip">전역 변수 · global</span><span class="concept-chip">조건문</span><span class="concept-chip">반복문</span></div>
+</div>
+
+<div class="card">
+<h2><span class="num">!</span> 평가 안내</h2>
+<ul class="rule-list">
+<li>각 문제의 <b>조건</b>에 적힌 <b>함수 이름, 매개 변수 개수, 결과 전달 방식</b>(<code>return</code>으로 반환 / 함수 안에서 출력)을 반드시 지켜야 합니다.</li>
+<li>실행 결과가 입출력 예시와 같더라도 조건을 지키지 않으면 감점됩니다.</li>
+<li>모든 문제의 코드를 작성해야 제출할 수 있습니다. 제출 전에 IDLE에서 직접 실행해 결과를 확인하세요.</li>
+</ul>
+<h3>배점 (20점 만점)</h3>
+<div class="table-scroll"><table>
+<tr><th>구분</th><th>배점</th><th>비고</th></tr>
+<tr><td>기본 점수</td><td>8점</td><td class="left">제출하면 기본으로 받는 점수</td></tr>
+<tr><td>문제 1</td><td>2점</td><td class="left"></td></tr>
+<tr><td>문제 2</td><td>2점</td><td class="left"></td></tr>
+<tr><td>문제 3</td><td>4점</td><td class="left">부분 점수 2점 가능</td></tr>
+<tr><td>문제 4</td><td>4점</td><td class="left">부분 점수 2점 가능</td></tr>
+<tr><td><b>합계</b></td><td><b>20점</b></td><td class="left"></td></tr>
+</table></div>
+</div>
+<div class="card" id="card0">
+<h2><span class="num">문제 1</span> 휴대폰 배터리 알림 <span class="pts">(2점)</span></h2>
+<div class="tags"><span class="tag">함수 1개</span><span class="tag">함수 안에서 출력</span><span class="tag">매개 변수 1개</span><span class="tag">조건문</span></div>
+<div class="story"><div class="s-label">📖 이야기</div>휴대폰 배터리가 얼마 남지 않으면 알려 주는 기능을 만들려고 한다. 남은 배터리 양(0~100)을 입력하면, <b>20 이하</b>이면 충전 안내를, 그보다 많으면 충분하다는 안내를 출력하자.</div>
+<p>배터리 양을 전달받아 안내 문구를 <b>함수 안에서 직접 출력</b>하는 함수를 작성하시오.</p>
+<h3>함수 설계도</h3><div class="table-scroll"><table class="funcs"><tr><th>함수</th><th>하는 일</th><th>매개 변수</th><th>반환값</th></tr><tr><td class="mono">battery(level)</td><td class="left">20 이하이면 <code>충전이 필요합니다</code><br>그 외 <code>배터리가 충분합니다</code> 출력</td><td class="left">배터리 양</td><td class="left">없음 (함수 안에서 출력)</td></tr></table></div>
+<h3>조건</h3>
+<ul class="rule-list"><li>함수 이름은 <code>battery</code>, 매개 변수는 <b>1개</b>로 합니다.</li><li>함수 <b>안에서</b> <code>print()</code>로 출력합니다. <code>return</code>은 사용하지 않습니다.</li><li>배터리 양을 입력받아 함수를 호출합니다.</li></ul>
+<h3>입출력 예시</h3>
+<div class="table-scroll"><table>
+<tr><th style="width:52px">번호</th><th>입력</th><th>출력</th><th>설명</th></tr>
+<tr><td>1</td><td class="mono">15</td><td class="result">충전이 필요합니다</td><td class="left"></td></tr><tr><td>2</td><td class="mono">20</td><td class="result">충전이 필요합니다</td><td class="left">20도 충전 필요</td></tr><tr><td>3</td><td class="mono">80</td><td class="result">배터리가 충분합니다</td><td class="left"></td></tr>
+</table></div>
+
+</div>
+<div class="card" id="card1">
+<h2><span class="num">문제 2</span> 버스 요금 알려 주기 <span class="pts">(2점)</span></h2>
+<div class="tags"><span class="tag">함수 1개</span><span class="tag">return 반환값</span><span class="tag">매개 변수 1개</span><span class="tag">조건문</span></div>
+<div class="story"><div class="s-label">📖 이야기</div>버스 요금은 나이에 따라 다르다. <b>18세 이하는 900원, 그 외는 1400원</b>이다. 나이를 입력하면 버스 요금을 알려 주자.</div>
+<p>나이를 전달받아 요금을 <b>반환</b>하는 함수를 작성하고, 반환된 요금을 출력하시오.</p>
+<h3>함수 설계도</h3><div class="table-scroll"><table class="funcs"><tr><th>함수</th><th>하는 일</th><th>매개 변수</th><th>반환값</th></tr><tr><td class="mono">fare(age)</td><td class="left">18세 이하 900, 그 외 1400</td><td class="left">나이</td><td class="left">요금</td></tr></table></div>
+<h3>조건</h3>
+<ul class="rule-list"><li>함수 이름은 <code>fare</code>, 매개 변수는 <b>1개</b>로 합니다.</li><li>함수는 요금을 <code>return</code>으로 돌려줍니다. 함수 안에서는 출력하지 않습니다.</li><li>나이를 입력받아 함수를 호출하고, 반환된 요금을 <code>버스 요금: 900</code> 형식으로 출력합니다.</li></ul>
+<h3>입출력 예시</h3>
+<div class="table-scroll"><table>
+<tr><th style="width:52px">번호</th><th>입력</th><th>출력</th><th>설명</th></tr>
+<tr><td>1</td><td class="mono">15</td><td class="result">버스 요금: 900</td><td class="left"></td></tr><tr><td>2</td><td class="mono">18</td><td class="result">버스 요금: 900</td><td class="left">18세도 900원</td></tr><tr><td>3</td><td class="mono">40</td><td class="result">버스 요금: 1400</td><td class="left"></td></tr>
+</table></div>
+
+</div>
+<div class="card" id="card2">
+<h2><span class="num">문제 3</span> 편의점 포인트 적립 <span class="pts">(4점 · 부분 점수 2점)</span></h2>
+<div class="tags"><span class="tag">함수 2개</span><span class="tag">전역 변수</span><span class="tag">global</span><span class="tag">매개 변수 없는 함수</span><span class="tag">반복문</span></div>
+<div class="story"><div class="s-label">📖 이야기</div>편의점에서 물건을 살 때마다 <b>결제 금액의 10%</b>가 포인트로 쌓인다. 3번 구매한 뒤 쌓인 포인트와 회원 등급을 알려 주자. (<b>1000점 이상 골드, 500점 이상 실버, 그 외 브론즈</b>)</div>
+<p>포인트를 <b>전역 변수</b>에 쌓는 함수와, 쌓인 포인트로 회원 등급을 알려 주는 함수, <b>두 개의 함수</b>를 작성하시오.</p>
+<h3>함수 설계도</h3><div class="table-scroll"><table class="funcs"><tr><th>함수</th><th>하는 일</th><th>매개 변수</th><th>반환값</th></tr><tr><td class="mono">add_point(price)</td><td class="left">결제 금액의 10%를 전역 변수 <code>point</code>에 더함</td><td class="left">결제 금액</td><td class="left">없음</td></tr><tr><td class="mono">grade()</td><td class="left">전역 변수 <code>point</code>로 회원 등급 판단</td><td class="left">없음</td><td class="left">등급 (골드·실버·브론즈)</td></tr></table></div>
+<h3>조건</h3>
+<ul class="rule-list"><li>프로그램 맨 위에 전역 변수 <code>point = 0</code>을 만듭니다.</li><li><code>add_point()</code>는 출력도 반환도 하지 않고, 전역 변수 <code>point</code>의 값을 바꿉니다.</li><li><code>grade()</code>는 매개 변수 <b>없이</b> 등급을 <code>return</code>합니다.</li><li>결제 금액을 한 줄에 하나씩 <b>3번</b> 입력받은 뒤, 적립 포인트와 회원 등급을 출력합니다.</li><li>결제 금액의 10%는 <code>price // 10</code>으로 구합니다.</li></ul>
+<h3>입출력 예시</h3>
+<div class="table-scroll"><table>
+<tr><th style="width:52px">번호</th><th>입력</th><th>출력</th><th>설명</th></tr>
+<tr><td>1</td><td class="mono">3000<br>5000<br>2500</td><td class="result">적립 포인트: 1050<br>회원 등급: 골드</td><td class="left">300+500+250</td></tr><tr><td>2</td><td class="mono">2000<br>1000<br>1500</td><td class="result">적립 포인트: 450<br>회원 등급: 브론즈</td><td class="left">200+100+150</td></tr><tr><td>3</td><td class="mono">4000<br>1000<br>0</td><td class="result">적립 포인트: 500<br>회원 등급: 실버</td><td class="left">500점도 실버</td></tr>
+</table></div>
+
+</div>
+<div class="card" id="card3">
+<h2><span class="num">문제 4</span> 체력 측정 오래달리기 <span class="pts">(4점 · 부분 점수 2점)</span></h2>
+<div class="tags"><span class="tag">함수 2개</span><span class="tag">매개 변수 2개</span><span class="tag">return과 출력</span><span class="tag">지역 변수</span><span class="tag">반복문</span></div>
+<div class="story"><div class="s-label">📖 이야기</div>체력 측정 날, 학생 <b>3명</b>의 오래달리기 기록을 분과 초로 입력하면 초로 바꾸어 등급을 알려 주자. (<b>300초 이하 1등급, 360초 이하 2등급, 그 외 3등급</b>)</div>
+<p>분과 초를 전체 초로 바꾸어 <b>반환</b>하는 함수와, 초를 받아 등급을 <b>출력</b>하는 함수, <b>두 개의 함수</b>를 작성하시오.</p>
+<h3>함수 설계도</h3><div class="table-scroll"><table class="funcs"><tr><th>함수</th><th>하는 일</th><th>매개 변수</th><th>반환값</th></tr><tr><td class="mono">to_sec(m, s)</td><td class="left">분과 초를 전체 초로 바꿈</td><td class="left">분, 초</td><td class="left">전체 초</td></tr><tr><td class="mono">judge(sec)</td><td class="left">등급을 지역 변수 <code>msg</code>에 저장한 뒤 출력</td><td class="left">초</td><td class="left">없음 (함수 안에서 출력)</td></tr></table></div>
+<h3>조건</h3>
+<ul class="rule-list"><li><code>to_sec()</code>는 매개 변수 <b>2개</b>를 받아 전체 초를 <code>return</code>합니다.</li><li><code>judge()</code>는 등급을 함수 안의 지역 변수 <code>msg</code>에 저장한 뒤, <code>290초 -> 1등급</code> 형식으로 <b>함수 안에서</b> 출력합니다.</li><li><code>to_sec()</code>의 반환값을 <code>judge()</code>에 전달합니다.</li><li>기록은 <code>4 50</code>처럼 분과 초를 공백으로 구분해 한 줄에 입력합니다.</li><li><b>한 명의 기록을 입력할 때마다 바로 한 줄씩</b> 등급을 출력하며, 이것을 <b>3명</b>분 반복합니다.</li></ul>
+<h3>입출력 예시</h3>
+<div class="table-scroll"><table>
+<tr><th style="width:52px">번호</th><th>실행 화면 <span class="legend">(<span class="in">검은 글씨</span>: 입력 · <span class="out">파란 글씨</span>: 출력)</span></th><th>설명</th></tr>
+<tr><td>1</td><td class="screen"><span class="in">4 50</span><br><span class="out">290초 -> 1등급</span><br><span class="in">5 0</span><br><span class="out">300초 -> 1등급</span><br><span class="in">6 15</span><br><span class="out">375초 -> 3등급</span></td><td class="left">4분 50초 = 4×60+50 = 290초<br>300초는 1등급</td></tr><tr><td>2</td><td class="screen"><span class="in">6 0</span><br><span class="out">360초 -> 2등급</span><br><span class="in">5 1</span><br><span class="out">301초 -> 2등급</span><br><span class="in">3 59</span><br><span class="out">239초 -> 1등급</span></td><td class="left">360초는 2등급<br>301초는 300초를 넘어 2등급</td></tr>
+</table></div>
+
+</div>
+</div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const ACTIVITY_TITLE = "함수 수행평가";
+const ACTIVITY_KICKER = "Ⅱ. 프로그래밍의 기초 · 4. 함수 — 수행평가";
+const PROBLEMS = [{"no": 1, "title": "휴대폰 배터리 알림", "think": ""}, {"no": 2, "title": "버스 요금 알려 주기", "think": ""}, {"no": 3, "title": "편의점 포인트 적립", "think": ""}, {"no": 4, "title": "체력 측정 오래달리기", "think": ""}];
+
+const GFORM_ACTION = 'https://docs.google.com/forms/d/e/1FAIpQLSfAhvtWQThBjiKmLkMTAEifzfKHvctgI-0IdKvJtp0xKvWuNg/formResponse';
+const GFORM_ENTRY = { studentId: 'entry.1718857135', name: 'entry.965838553', code: 'entry.885478980' };
+const $ = id => document.getElementById(id);
+
+function showToast(msg, isErr){
+  const t = $('toast');
+  t.innerHTML = (isErr ? '' : '<span class="badge-ok">✓</span>') + '<span>' + msg + '</span>';
+  t.className = 'toast show' + (isErr ? ' err' : '');
+  clearTimeout(t._timer); t._timer = setTimeout(() => t.classList.remove('show'), 3600);
+}
+function clearErrors(){
+  $('fStudentId').classList.remove('error'); $('fStudentName').classList.remove('error');
+  PROBLEMS.forEach((_, i) => { $('box'+i).classList.remove('error'); $('err'+i).classList.remove('show'); });
+}
+
+// 코드 칸에서 Tab 키 → 공백 4칸
+document.querySelectorAll('textarea.code').forEach(ta => {
+  ta.addEventListener('keydown', e => {
+    if(e.key === 'Tab' && !e.shiftKey){
+      e.preventDefault();
+      const s = ta.selectionStart, en = ta.selectionEnd;
+      ta.value = ta.value.slice(0, s) + '    ' + ta.value.slice(en);
+      ta.selectionStart = ta.selectionEnd = s + 4;
+    }
+  });
+  ta.addEventListener('input', () => { const i = ta.id.slice(4); $('box'+i).classList.remove('error'); $('err'+i).classList.remove('show'); });
+});
+
+$('resetBtn').addEventListener('click', () => { $('resetConfirm').classList.add('show'); $('resetBtn').style.display = 'none'; });
+$('resetNo').addEventListener('click', () => { $('resetConfirm').classList.remove('show'); $('resetBtn').style.display = ''; });
+$('resetYes').addEventListener('click', () => {
+  $('studentId').value = ''; $('studentName').value = '';
+  PROBLEMS.forEach((_, i) => { $('code'+i).value = ''; if($('think'+i)) $('think'+i).value = ''; });
+  clearErrors();
+  $('resetConfirm').classList.remove('show'); $('resetBtn').style.display = '';
+  showToast('초기화되었습니다.');
+});
+
+$('submitBtn').addEventListener('click', async function(){
+  clearErrors();
+  const id = $('studentId').value.trim(), name = $('studentName').value.trim();
+  let hasError = false, firstBad = null;
+  if(!id){ $('fStudentId').classList.add('error'); hasError = true; firstBad = firstBad || $('studentId'); }
+  if(!name){ $('fStudentName').classList.add('error'); hasError = true; firstBad = firstBad || $('studentName'); }
+  const missing = [];
+  PROBLEMS.forEach((p, i) => {
+    if(!$('code'+i).value.trim()){
+      $('box'+i).classList.add('error'); $('err'+i).classList.add('show');
+      missing.push('문제 ' + p.no); hasError = true; firstBad = firstBad || $('code'+i);
+    }
+  });
+  if(hasError){
+    showToast(!id || !name ? '학번과 이름을 입력해 주세요.' : missing.join(', ') + '의 코드를 작성해 주세요.', true);
+    if(firstBad) firstBad.focus();
+    return;
+  }
+
+  const btn = $('submitBtn'); btn.disabled = true; btn.textContent = '제출 중...';
+  const now = new Date();
+  const ts = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0') + ' ' +
+    String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+  const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+  const cards = PROBLEMS.map((p, i) => {
+    const code = $('code'+i).value, thEl = $('think'+i), th = thEl ? thEl.value.trim() : '';
+    const thHtml = thEl ? `<div class="d-label">생각해 보기 — ${p.think}</div>
+<div class="d-value">${th ? esc(th).replace(/\n/g,'<br>') : '<span class="empty">(작성 없음)</span>'}</div>` : '';
+    return `<div class="card"><h2>문제 ${p.no}. ${esc(p.title)}</h2>
+<div class="code-box"><pre>${esc(code)}</pre></div>${thHtml}</div>`;
+  }).join('');
+
+  const submissionHtml = `<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8">
+<title>${ACTIVITY_TITLE} — ${esc(id)} ${esc(name)} 제출 문서</title>
+<style>
+  body{margin:0; background:#F4F7FA; color:#1A2233; font-family:"Malgun Gothic","맑은 고딕",sans-serif; padding:32px 16px 60px;}
+  .wrap{max-width:760px; margin:0 auto;}
+  .hero{background:linear-gradient(135deg,#1F3A5F 0%, #16233F 100%); color:#fff; border-radius:14px; padding:28px 32px; margin-bottom:20px;}
+  .hero .kicker{color:#7FB0FF; font-weight:700; font-size:13px; margin-bottom:8px;}
+  .hero h1{margin:0 0 10px; font-size:24px;}
+  .meta-row{display:flex; gap:24px; flex-wrap:wrap; font-size:14px; color:#C9D6E8;}
+  .meta-row b{color:#fff;}
+  .card{background:#fff; border:1px solid #DCE4EC; border-radius:12px; padding:22px 26px; margin-bottom:16px;}
+  .card h2{font-size:15px; margin:0 0 12px; color:#1F3A5F; border-bottom:2px solid #1F3A5F; padding-bottom:8px;}
+  .d-label{font-weight:700; font-size:13px; color:#1F3A5F; margin:14px 0 4px;}
+  .d-value{font-size:14px; color:#333; line-height:1.6;}
+  .d-value .empty{color:#9AA7B8; font-style:italic;}
+  .code-box{background:#0E1729; border-radius:10px; padding:16px 18px; overflow-x:auto;}
+  .code-box pre{margin:0; color:#E7ECF3; font-family:"Consolas","D2Coding",monospace; font-size:13.5px; line-height:1.6; white-space:pre-wrap;}
+  .stamp{text-align:center; font-size:12px; color:#9AA7B8; margin-top:20px;}
+</style></head>
+<body><div class="wrap">
+  <div class="hero"><div class="kicker">${ACTIVITY_KICKER} — 제출 문서</div><h1>${ACTIVITY_TITLE}</h1>
+    <div class="meta-row"><div>학번 <b>${esc(id)}</b></div><div>이름 <b>${esc(name)}</b></div><div>제출 시각 <b>${esc(ts)}</b></div></div></div>
+  ${cards}
+  <div class="stamp">이 문서는 활동지 제출 시 자동으로 생성되었습니다.</div>
+</div></body></html>`;
+
+  const formText = `[활동] ${ACTIVITY_TITLE}\n\n` + PROBLEMS.map((p, i) =>
+`[문제 ${p.no}] ${p.title}
+${$('code'+i).value.trim()}` + ($('think'+i) ? `
+
+- 생각해 보기: ${$('think'+i).value.trim() || '(작성 없음)'}` : '')).join('\n\n');
+
+  const fd = new URLSearchParams();
+  fd.append(GFORM_ENTRY.studentId, id);
+  fd.append(GFORM_ENTRY.name, name);
+  fd.append(GFORM_ENTRY.code, formText);
+  try { await fetch(GFORM_ACTION, { method:'POST', mode:'no-cors', body:fd }); } catch(err) {}
+
+  const blob = new Blob([submissionHtml], { type:'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = `${id}_${name}.html`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+
+  btn.disabled = false; btn.textContent = '제출하기';
+  showToast('개인 보관용 HTML 파일을 저장했습니다. 온라인 접수 여부는 선생님의 응답 시트에서 확인해 주세요.');
+});
+
+</script>
+</body>
+</html>
